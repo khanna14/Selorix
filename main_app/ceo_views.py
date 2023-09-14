@@ -16,17 +16,73 @@ from .models import *
 
 def holiday_list(request):
     holidays = Holiday.objects.all()
-    return render(request, 'ceo_template/holiday_list.html', {'holidays': holidays})
+    return render(request, 'main_app/holiday_list.html', {'holidays': holidays})
 
+# def add_edit_holiday(request, holiday_id=None):
+#     if holiday_id:
+#         holiday = Holiday.objects.get(pk=holiday_id)
+#     else:
+#         holiday = None
 
+#     if request.method == 'POST':
+#         form = HolidayForm(request.POST, instance=holiday)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('holiday_list')
+#     else:
+#         form = HolidayForm(instance=holiday)
 
-def delete_holiday(request, pk):
-    holiday = get_object_or_404(Holiday, pk=pk)
+#     return render(request, 'ceo_template/add_edit_holiday.html', {'form': form})
+
+def add_edit_holiday(request):
+    form = HolidayForm(request.POST or None)
+    context = { 
+        'form': form,
+        'page_title': 'Add Holiday'
+    }
     if request.method == 'POST':
-        holiday.delete()
-        return redirect('holiday_list')
-    
-    return render(request, 'ceo_template/delete_holiday_confirm.html', {'holiday': holiday})
+        if form.is_valid():
+            name = form.cleaned_data.get('name')
+            date = form.cleaned_data.get('date')
+            try:
+                holiday = Holiday()
+                holiday.name = name
+                holiday.date = date
+                holiday.save()
+                messages.success(request, "Successfully Added")
+                return redirect(reverse('holiday_list'))
+
+            except Exception as e:
+                messages.error(request, "Could Not Add " + str(e))
+        else:
+            messages.error(request, "Fill Form Properly")
+
+    return render(request, 'ceo_template/add_edit_holiday.html', context)
+
+def add_department(request):
+    form = DepartmentForm(request.POST or None)
+    context = { 
+        'form': form,
+        'page_title': 'Add Department'
+    }
+    if request.method == 'POST':
+        if form.is_valid():
+            name = form.cleaned_data.get('name')
+            division = form.cleaned_data.get('division')
+            try:
+                department = Department()
+                department.name = name
+                department.division = division
+                department.save()
+                messages.success(request, "Successfully Added")
+                return redirect(reverse('add_department'))
+
+            except Exception as e:
+                messages.error(request, "Could Not Add " + str(e))
+        else:
+            messages.error(request, "Fill Form Properly")
+
+    return render(request, 'ceo_template/add_department_template.html', context)
 
 def admin_home(request):
     total_manager = Manager.objects.all().count()
@@ -58,7 +114,7 @@ def manage_manager(request):
     allManager = CustomUser.objects.filter(user_type=2)
     context = {
         'allManager': allManager,
-        'page_title': 'Manage Manager'
+        'page_title': 'All Managers'
     }
     return render(request, "ceo_template/manage_manager.html", context)
 
@@ -152,32 +208,6 @@ def add_division(request):
             messages.error(request, "Could Not Add")
     return render(request, 'ceo_template/add_division_template.html', context)
 
-def add_holiday(request):
-    form = HolidayForm(request.POST  or None)
-    context = { 
-        'form': form,
-        'page_title': 'Add Holiday'
-    }
-    if request.method == 'POST':
-        
-        if form.is_valid():
-            name = form.cleaned_data.get('name')
-            date = form.cleaned_data.get('date')
-            # form.save()
-            # return redirect('holiday_list')
-            try:
-                holiday = Holiday()
-                holiday.name = name
-                holiday.date = date
-                holiday.save()
-                return redirect('holiday_list')
-            except Exception as e:
-                messages.error(request, "Could Not Add " + str(e))
-        else:
-            messages.error(request, "Fill Form Properly")
-    
-    return render(request, 'ceo_template/holiday_list.html', {'form': form})
-
 def add_department(request):
     form = DepartmentForm(request.POST or None)
     context = { 
@@ -210,7 +240,7 @@ def manage_employee(request):
     employees = CustomUser.objects.filter(user_type=3)
     context = {
         'employees': employees,
-        'page_title': 'Manage Employees'
+        'page_title': 'All Employees'
     }
     return render(request, "ceo_template/manage_employee.html", context)
 
@@ -653,4 +683,10 @@ def delete_department(request, department_id):
     department.delete()
     messages.success(request, "Department deleted successfully!")
     return redirect(reverse('manage_department'))
+
+def delete_holiday(request, holiday_id):
+    holiday = get_object_or_404(Holiday, id=holiday_id)
+    holiday.delete()
+    messages.success(request, "Holiday deleted successfully!")
+    return redirect(reverse('holiday_list'))
 

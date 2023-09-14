@@ -1,10 +1,9 @@
 {% load static %}
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<aside class="main-sidebar sidebar-dark-warning elevation-4">
     {% if request.user.user_type == '1' %}
     <!-- Brand Logo -->
 
-
-
+   
 
 
     <!-- Sidebar -->
@@ -32,7 +31,7 @@
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <ul class="nav  nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
                 <li class="nav-item">
                     {% url 'admin_home' as admin_home %}
@@ -203,7 +202,6 @@
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             Manager Leave
-
                         </p>
                     </a>
                 </li>

@@ -177,3 +177,7 @@ class HolidayForm(forms.ModelForm):
     class Meta:
         model = Holiday
         fields = ['name', 'date']
+        # Define widgets for specific fields
+        widgets = {
+            'date': DateInput(attrs={'type': 'date'}),
+        }
