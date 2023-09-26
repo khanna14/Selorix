@@ -11,5 +11,5 @@ class UserModel(UserAdmin):
 admin.site.register(CustomUser, UserModel)
 admin.site.register(Manager)
 admin.site.register(Employee)
-admin.site.register(Division)
+# admin.site.register(Division)
 admin.site.register(Department)

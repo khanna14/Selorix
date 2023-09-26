@@ -56,49 +56,44 @@ class Admin(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
 
-
-class Division(models.Model):
+class Department(models.Model):
     name = models.CharField(max_length=120)
-    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
-
 class Manager(models.Model):
-    division = models.ForeignKey(Division, on_delete=models.DO_NOTHING, null=True, blank=False)
+    department = models.ForeignKey(Department,on_delete=models.DO_NOTHING, default=None)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.admin.last_name + " " + self.admin.first_name
 
 
-class Department(models.Model):
-    name = models.CharField(max_length=120)
-    division = models.ForeignKey(Division, on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Employee(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    division = models.ForeignKey(Division, on_delete=models.DO_NOTHING, null=True, blank=False)
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING, null=True, blank=False)
+    # department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
 
     def __str__(self):
         return self.admin.last_name + ", " + self.admin.first_name
 
 
 class Attendance(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING)
+    STATUS_CHOICES = (
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('leave', 'Leave'),
+        ('holiday', 'Holiday'),
+    )
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
     date = models.DateField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
 class AttendanceReport(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.DO_NOTHING)
@@ -107,7 +102,6 @@ class AttendanceReport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
 class LeaveReportEmployee(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.CharField(max_length=60)
@@ -115,7 +109,6 @@ class LeaveReportEmployee(models.Model):
     status = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
 class LeaveReportManager(models.Model):
     manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
@@ -126,20 +119,20 @@ class LeaveReportManager(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class FeedbackEmployee(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    feedback = models.TextField()
-    reply = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# class FeedbackEmployee(models.Model):
+#     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+#     feedback = models.TextField()
+#     reply = models.TextField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
 
-class FeedbackManager(models.Model):
-    manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
-    feedback = models.TextField()
-    reply = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# class FeedbackManager(models.Model):
+#     manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
+#     feedback = models.TextField()
+#     reply = models.TextField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
 
 class NotificationManager(models.Model):

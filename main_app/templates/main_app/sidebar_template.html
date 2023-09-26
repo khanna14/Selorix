@@ -19,15 +19,7 @@
             </div>
         </div>
 
-        <!-- Sidebar user panel (optional) -->
-        <!-- <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
-                <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
-            </div>
-            <div class="info">
-                <a href="#" class="d-block">{{user}}</a>
-            </div>
-        </div> -->
+
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
@@ -54,16 +46,7 @@
                         </p>
                     </a>
                 </li>
-                <!-- <li class="nav-item">
-                    {% url 'add_manager' as add_manager %}
-                    <a href="{{add_manager}}" class="nav-link {% if add_manager == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>
-                            Add Manager
 
-                        </p>
-                    </a>
-                </li> -->
 
                 <li class="nav-item">
                     {% url 'manage_manager' as manage_manager %}
@@ -77,16 +60,7 @@
                         </p>
                     </a>
                 </li>
-                <!-- <li class="nav-item">
-                    {% url 'add_employee' as add_employee%}
-                    <a href="{{add_employee}}" class="nav-link  {% if add_employee == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>
-                            Add Employee
 
-                        </p>
-                    </a>
-                </li> -->
                 <li class="nav-item">
                     {% url 'manage_employee' as manage_employee %}
                     {% url 'edit_employee' employee_id as edit_employee %}
@@ -100,21 +74,12 @@
                         </p>
                     </a>
                 </li>
-                <!-- <li class="nav-item">
-                    {% url 'add_division' as add_division %}
-                    <a href="{{add_division}}" class="nav-link  {% if add_division == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>
-                            Add Division
 
-                        </p>
-                    </a>
-                </li> -->
                 <li class="nav-item">
-                    {% url 'manage_division' as manage_division %}
-                    {% url 'edit_division' division_id as edit_division %}
-                    <a href="{{manage_division}}"
-                        class="nav-link  {% if edit_division == request.path or manage_division == request.path %} active {% endif %}">
+                    {% url 'manage_department' as manage_department %}
+                    {% url 'edit_department' department_id as edit_department %}
+                    <a href="{{manage_department}}"
+                        class="nav-link  {% if edit_department == request.path or manage_department == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             Department
@@ -190,7 +155,6 @@
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             Holiday List
-
                         </p>
                     </a>
                 </li>   
@@ -450,7 +414,18 @@
                                                 </p>
                                             </a>
                                         </li>
-
+                                        <li class="nav-item">
+                                            {% url 'holiday_list' as holiday_list %}
+                        
+                                            <a href="{{holiday_list}}"
+                                                class="nav-link  {% if holiday_list == request.path %} active {% endif %}">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Holiday List
+                        
+                                                </p>
+                                            </a>
+                                        </li> 
                                         <li class="nav-item">
                                             {% url 'employee_apply_leave' as employee_apply_leave %}
                                             <a href="{{employee_apply_leave}}"

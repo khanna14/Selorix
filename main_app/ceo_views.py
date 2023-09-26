@@ -68,11 +68,9 @@ def add_department(request):
     if request.method == 'POST':
         if form.is_valid():
             name = form.cleaned_data.get('name')
-            division = form.cleaned_data.get('division')
             try:
                 department = Department()
                 department.name = name
-                department.division = division
                 department.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_department'))
@@ -89,23 +87,21 @@ def admin_home(request):
     total_employees = Employee.objects.all().count()
     departments = Department.objects.all()
     total_department = departments.count()
-    total_division = Division.objects.all().count()
-    attendance_list = Attendance.objects.filter(department__in=departments)
+    attendance_list = Attendance.objects.all()
     total_attendance = attendance_list.count()
     attendance_list = []
     department_list = []
     for department in departments:
-        attendance_count = Attendance.objects.filter(department=department).count()
+        attendance_count = Attendance.objects.all().count()
         department_list.append(department.name[:7])
         attendance_list.append(attendance_count)
     context = {
         'page_title': "Administrative Dashboard",
-        'total_employees': total_employees,
-        'total_manager': total_manager,
-        'total_division': total_division,
-        'total_department': total_department,
-        'department_list': department_list,
-        'attendance_list': attendance_list
+        # 'total_employees': total_employees,
+        # 'total_manager': total_manager,
+        # 'total_department': total_department,
+        # 'department_list': department_list,
+        # 'attendance_list': attendance_list
 
     }
     return render(request, 'ceo_template/home_content.html', context)
@@ -118,7 +114,6 @@ def manage_manager(request):
     }
     return render(request, "ceo_template/manage_manager.html", context)
 
-
 def add_manager(request):
     form = ManagerForm(request.POST or None, request.FILES or None)
     context = {'form': form, 'page_title': 'Add Manager'}
@@ -130,7 +125,7 @@ def add_manager(request):
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password')
-            division = form.cleaned_data.get('division')
+            department = form.cleaned_data.get('department')
             passport = request.FILES.get('profile_pic')
             fs = FileSystemStorage()
             filename = fs.save(passport.name, passport)
@@ -140,7 +135,7 @@ def add_manager(request):
                     email=email, password=password, user_type=2, first_name=first_name, last_name=last_name, profile_pic=passport_url)
                 user.gender = gender
                 user.address = address
-                user.manager.division = division
+                user.manager.department = department
                 user.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_manager'))
@@ -151,7 +146,6 @@ def add_manager(request):
             messages.error(request, "Please fulfil all requirements")
 
     return render(request, 'ceo_template/add_manager_template.html', context)
-
 
 def add_employee(request):
     employee_form = EmployeeForm(request.POST or None, request.FILES or None)
@@ -164,7 +158,6 @@ def add_employee(request):
             email = employee_form.cleaned_data.get('email')
             gender = employee_form.cleaned_data.get('gender')
             password = employee_form.cleaned_data.get('password')
-            division = employee_form.cleaned_data.get('division')
             department = employee_form.cleaned_data.get('department')
             passport = request.FILES['profile_pic']
             fs = FileSystemStorage()
@@ -175,7 +168,6 @@ def add_employee(request):
                     email=email, password=password, user_type=3, first_name=first_name, last_name=last_name, profile_pic=passport_url)
                 user.gender = gender
                 user.address = address
-                user.employee.division = division
                 user.employee.department = department
                 user.save()
                 messages.success(request, "Successfully Added")
@@ -186,56 +178,6 @@ def add_employee(request):
             messages.error(request, "Could Not Add: ")
     return render(request, 'ceo_template/add_employee_template.html', context)
 
-
-def add_division(request):
-    form = DivisionForm(request.POST or None)
-    context = {
-        'form': form,
-        'page_title': 'Add Division'
-    }
-    if request.method == 'POST':
-        if form.is_valid():
-            name = form.cleaned_data.get('name')
-            try:
-                division = Division()
-                division.name = name
-                division.save()
-                messages.success(request, "Successfully Added")
-                return redirect(reverse('add_division'))
-            except:
-                messages.error(request, "Could Not Add")
-        else:
-            messages.error(request, "Could Not Add")
-    return render(request, 'ceo_template/add_division_template.html', context)
-
-def add_department(request):
-    form = DepartmentForm(request.POST or None)
-    context = { 
-        'form': form,
-        'page_title': 'Add Department'
-    }
-    if request.method == 'POST':
-        if form.is_valid():
-            name = form.cleaned_data.get('name')
-            division = form.cleaned_data.get('division')
-            try:
-                department = Department()
-                department.name = name
-                department.division = division
-                department.save()
-                messages.success(request, "Successfully Added")
-                return redirect(reverse('add_department'))
-
-            except Exception as e:
-                messages.error(request, "Could Not Add " + str(e))
-        else:
-            messages.error(request, "Fill Form Properly")
-
-    return render(request, 'ceo_template/add_department_template.html', context)
-
-
-
-
 def manage_employee(request):
     employees = CustomUser.objects.filter(user_type=3)
     context = {
@@ -244,16 +186,11 @@ def manage_employee(request):
     }
     return render(request, "ceo_template/manage_employee.html", context)
 
-
 def manage_division(request):
-    divisions = Division.objects.all()
     context = {
-        'divisions': divisions,
         'page_title': 'Manage Divisions'
     }
     return render(request, "ceo_template/manage_division.html", context)
-
-
 
 def manage_department(request):
     departments = Department.objects.all()
@@ -262,7 +199,6 @@ def manage_department(request):
         'page_title': 'Manage Departments'
     }
     return render(request, "ceo_template/manage_department.html", context)
-
 
 def edit_manager(request, manager_id):
     manager = get_object_or_404(Manager, id=manager_id)
@@ -281,7 +217,8 @@ def edit_manager(request, manager_id):
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password') or None
-            division = form.cleaned_data.get('division')
+            # division = form.cleaned_data.get('division')
+            department = form.cleaned_data.get('department')
             passport = request.FILES.get('profile_pic') or None
             try:
                 user = CustomUser.objects.get(id=manager.admin.id)
@@ -298,7 +235,8 @@ def edit_manager(request, manager_id):
                 user.last_name = last_name
                 user.gender = gender
                 user.address = address
-                manager.division = division
+                # manager.division = division
+                manager.department = department
                 user.save()
                 manager.save()
                 messages.success(request, "Successfully Updated")
@@ -311,7 +249,6 @@ def edit_manager(request, manager_id):
         user = CustomUser.objects.get(id=manager_id)
         manager = Manager.objects.get(id=user.id)
         return render(request, "ceo_template/edit_manager_template.html", context)
-
 
 def edit_employee(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
@@ -330,7 +267,7 @@ def edit_employee(request, employee_id):
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password') or None
-            division = form.cleaned_data.get('division')
+            # division = form.cleaned_data.get('division')
             department = form.cleaned_data.get('department')
             passport = request.FILES.get('profile_pic') or None
             try:
@@ -348,7 +285,7 @@ def edit_employee(request, employee_id):
                 user.last_name = last_name
                 user.gender = gender
                 user.address = address
-                employee.division = division
+                # employee.division = division
                 employee.department = department
                 user.save()
                 employee.save()
@@ -361,31 +298,6 @@ def edit_employee(request, employee_id):
     else:
         return render(request, "ceo_template/edit_employee_template.html", context)
 
-
-def edit_division(request, division_id):
-    instance = get_object_or_404(Division, id=division_id)
-    form = DivisionForm(request.POST or None, instance=instance)
-    context = {
-        'form': form,
-        'division_id': division_id,
-        'page_title': 'Edit Division'
-    }
-    if request.method == 'POST':
-        if form.is_valid():
-            name = form.cleaned_data.get('name')
-            try:
-                division = Division.objects.get(id=division_id)
-                division.name = name
-                division.save()
-                messages.success(request, "Successfully Updated")
-            except:
-                messages.error(request, "Could Not Update")
-        else:
-            messages.error(request, "Could Not Update")
-
-    return render(request, 'ceo_template/edit_division_template.html', context)
-
-
 def edit_department(request, department_id):
     instance = get_object_or_404(Department, id=department_id)
     form = DepartmentForm(request.POST or None, instance=instance)
@@ -397,11 +309,11 @@ def edit_department(request, department_id):
     if request.method == 'POST':
         if form.is_valid():
             name = form.cleaned_data.get('name')
-            division = form.cleaned_data.get('division')
+            # division = form.cleaned_data.get('division')
             try:
                 department = Department.objects.get(id=department_id)
                 department.name = name
-                department.division = division
+                # department.division = division
                 department.save()
                 messages.success(request, "Successfully Updated")
                 return redirect(reverse('edit_department', args=[department_id]))
@@ -410,7 +322,6 @@ def edit_department(request, department_id):
         else:
             messages.error(request, "Fill Form Properly")
     return render(request, 'ceo_template/edit_department_template.html', context)
-
 
 @csrf_exempt
 def check_email_availability(request):
@@ -423,48 +334,45 @@ def check_email_availability(request):
     except Exception as e:
         return HttpResponse(False)
 
+# @csrf_exempt
+# def employee_feedback_message(request):
+#     if request.method != 'POST':
+#         feedbacks = FeedbackEmployee.objects.all()
+#         context = {
+#             'feedbacks': feedbacks,
+#             'page_title': 'Employee Feedback Messages'
+#         }
+#         return render(request, 'ceo_template/employee_feedback_template.html', context)
+#     else:
+#         feedback_id = request.POST.get('id')
+#         try:
+#             feedback = get_object_or_404(FeedbackEmployee, id=feedback_id)
+#             reply = request.POST.get('reply')
+#             feedback.reply = reply
+#             feedback.save()
+#             return HttpResponse(True)
+#         except Exception as e:
+#             return HttpResponse(False)
 
-@csrf_exempt
-def employee_feedback_message(request):
-    if request.method != 'POST':
-        feedbacks = FeedbackEmployee.objects.all()
-        context = {
-            'feedbacks': feedbacks,
-            'page_title': 'Employee Feedback Messages'
-        }
-        return render(request, 'ceo_template/employee_feedback_template.html', context)
-    else:
-        feedback_id = request.POST.get('id')
-        try:
-            feedback = get_object_or_404(FeedbackEmployee, id=feedback_id)
-            reply = request.POST.get('reply')
-            feedback.reply = reply
-            feedback.save()
-            return HttpResponse(True)
-        except Exception as e:
-            return HttpResponse(False)
-
-
-@csrf_exempt
-def manager_feedback_message(request):
-    if request.method != 'POST':
-        feedbacks = FeedbackManager.objects.all()
-        context = {
-            'feedbacks': feedbacks,
-            'page_title': 'Manager Feedback Messages'
-        }
-        return render(request, 'ceo_template/manager_feedback_template.html', context)
-    else:
-        feedback_id = request.POST.get('id')
-        try:
-            feedback = get_object_or_404(FeedbackManager, id=feedback_id)
-            reply = request.POST.get('reply')
-            feedback.reply = reply
-            feedback.save()
-            return HttpResponse(True)
-        except Exception as e:
-            return HttpResponse(False)
-
+# @csrf_exempt
+# def manager_feedback_message(request):
+#     if request.method != 'POST':
+#         feedbacks = FeedbackManager.objects.all()
+#         context = {
+#             'feedbacks': feedbacks,
+#             'page_title': 'Manager Feedback Messages'
+#         }
+#         return render(request, 'ceo_template/manager_feedback_template.html', context)
+#     else:
+#         feedback_id = request.POST.get('id')
+#         try:
+#             feedback = get_object_or_404(FeedbackManager, id=feedback_id)
+#             reply = request.POST.get('reply')
+#             feedback.reply = reply
+#             feedback.save()
+#             return HttpResponse(True)
+#         except Exception as e:
+#             return HttpResponse(False)
 
 @csrf_exempt
 def view_manager_leave(request):
@@ -525,7 +433,6 @@ def admin_view_attendance(request):
 
     return render(request, "ceo_template/admin_view_attendance.html", context)
 
-
 @csrf_exempt
 def get_admin_attendance(request):
     department_id = request.POST.get('department')
@@ -544,7 +451,6 @@ def get_admin_attendance(request):
         return JsonResponse(json.dumps(json_data), safe=False)
     except Exception as e:
         return None
-
 
 def admin_view_profile(request):
     admin = get_object_or_404(Admin, admin=request.user)
@@ -667,22 +573,12 @@ def delete_employee(request, employee_id):
     return redirect(reverse('manage_employee'))
 
 
-def delete_division(request, division_id):
-    division = get_object_or_404(Division, id=division_id)
-    try:
-        division.delete()
-        messages.success(request, "Division deleted successfully!")
-    except Exception:
-        messages.error(
-            request, "Sorry, some employees are assigned to this division already. Kindly change the affected employee division and try again")
-    return redirect(reverse('manage_division'))
-
-
 def delete_department(request, department_id):
     department = get_object_or_404(Department, id=department_id)
     department.delete()
     messages.success(request, "Department deleted successfully!")
     return redirect(reverse('manage_department'))
+
 
 def delete_holiday(request, holiday_id):
     holiday = get_object_or_404(Holiday, id=holiday_id)

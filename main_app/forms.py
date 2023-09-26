@@ -30,6 +30,8 @@ class CustomUserForm(FormSettings):
         if kwargs.get('instance'):
             instance = kwargs.get('instance').admin.__dict__
             self.fields['password'].required = False
+            self.fields['address'].required = False
+            self.fields['profile_pic'].required = False
             for field in CustomUserForm.Meta.fields:
                 self.fields[field].initial = instance.get(field)
             if self.instance.pk is not None:
@@ -62,7 +64,7 @@ class EmployeeForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Employee
         fields = CustomUserForm.Meta.fields + \
-            ['division', 'department']
+            ['manager']
 
 
 class AdminForm(CustomUserForm):
@@ -81,16 +83,16 @@ class ManagerForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Manager
         fields = CustomUserForm.Meta.fields + \
-            ['division' ]
+            ['department' ]
 
 
-class DivisionForm(FormSettings):
-    def __init__(self, *args, **kwargs):
-        super(DivisionForm, self).__init__(*args, **kwargs)
+# class DivisionForm(FormSettings):
+#     def __init__(self, *args, **kwargs):
+#         super(DivisionForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        fields = ['name']
-        model = Division
+#     class Meta:
+#         fields = ['name']
+#         model = Division
 
 
 class DepartmentForm(FormSettings):
@@ -100,7 +102,7 @@ class DepartmentForm(FormSettings):
 
     class Meta:
         model = Department
-        fields = ['name', 'division']
+        fields = ['name']
 
 
 class LeaveReportManagerForm(FormSettings):
@@ -115,14 +117,14 @@ class LeaveReportManagerForm(FormSettings):
         }
 
 
-class FeedbackManagerForm(FormSettings):
+# class FeedbackManagerForm(FormSettings):
 
-    def __init__(self, *args, **kwargs):
-        super(FeedbackManagerForm, self).__init__(*args, **kwargs)
+#     def __init__(self, *args, **kwargs):
+#         super(FeedbackManagerForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = FeedbackManager
-        fields = ['feedback']
+#     class Meta:
+#         model = FeedbackManager
+#         fields = ['feedback']
 
 
 class LeaveReportEmployeeForm(FormSettings):
@@ -137,14 +139,14 @@ class LeaveReportEmployeeForm(FormSettings):
         }
 
 
-class FeedbackEmployeeForm(FormSettings):
+# class FeedbackEmployeeForm(FormSettings):
 
-    def __init__(self, *args, **kwargs):
-        super(FeedbackEmployeeForm, self).__init__(*args, **kwargs)
+#     def __init__(self, *args, **kwargs):
+#         super(FeedbackEmployeeForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = FeedbackEmployee
-        fields = ['feedback']
+#     class Meta:
+#         model = FeedbackEmployee
+#         fields = ['feedback']
 
 
 class EmployeeEditForm(CustomUserForm):
@@ -172,6 +174,7 @@ class EditSalaryForm(FormSettings):
     class Meta:
         model = EmployeeSalary
         fields = ['department', 'employee', 'base', 'ctc']
+
 
 class HolidayForm(forms.ModelForm):
     class Meta:

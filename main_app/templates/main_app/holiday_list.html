@@ -10,7 +10,9 @@
                 <tr>
                     <th>Name</th>
                     <th>Date</th>
+                    {% if request.user.user_type == '1' %}
                     <th>Actions</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -18,12 +20,13 @@
                 <tr>
                     <td>{{ holiday.name }}</td>
                     <td>{{ holiday.date }}</td>
+                    {% if request.user.user_type == '1' %}
                     <td>
                         {% url 'delete_holiday' as delete_holiday %}
                         <a href="{% url 'delete_holiday' holiday.id%}" class="btn btn-danger" onclick="return confirm('Are you sure about this ?')">Delete</a>
                     </td>
                     <!-- <td>{{ holiday.id }}</td> -->
-
+                    {% endif %}
                 </tr>
                 {% empty %}
                 <tr>
@@ -32,8 +35,10 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% if request.user.user_type == '1' %}
         {% url 'add_holiday' as add_holiday %}
         <a href="{% url 'add_holiday' %}" class="btn btn-warning">Add New Holiday</a>
+        {% endif %}
     </div>
 
 {% endblock content %}

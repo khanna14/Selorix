@@ -16,7 +16,7 @@ from .models import *
 
 def employee_home(request):
     employee = get_object_or_404(Employee, admin=request.user)
-    total_department = Department.objects.filter(division=employee.division).count()
+    total_department = Department.objects.all().count()
     total_attendance = AttendanceReport.objects.filter(employee=employee).count()
     total_present = AttendanceReport.objects.filter(employee=employee, status=True).count()
     if total_attendance == 0:  # Don't divide. DivisionByZero
@@ -27,7 +27,7 @@ def employee_home(request):
     department_name = []
     data_present = []
     data_absent = []
-    departments = Department.objects.filter(division=employee.division)
+    departments = Department.objects.all()
     for department in departments:
         attendance = Attendance.objects.filter(department=department)
         present_count = AttendanceReport.objects.filter(
@@ -56,9 +56,8 @@ def employee_home(request):
 def employee_view_attendance(request):
     employee = get_object_or_404(Employee, admin=request.user)
     if request.method != 'POST':
-        division = get_object_or_404(Division, id=employee.division.id)
         context = {
-            'departments': Department.objects.filter(division=division),
+            'departments': Department.objects.all(),
             'page_title': 'View Attendance'
         }
         return render(request, 'employee_template/employee_view_attendance.html', context)
@@ -110,29 +109,29 @@ def employee_apply_leave(request):
     return render(request, "employee_template/employee_apply_leave.html", context)
 
 
-def employee_feedback(request):
-    form = FeedbackEmployeeForm(request.POST or None)
-    employee = get_object_or_404(Employee, admin_id=request.user.id)
-    context = {
-        'form': form,
-        'feedbacks': FeedbackEmployee.objects.filter(employee=employee),
-        'page_title': 'Employee Feedback'
+# def employee_feedback(request):
+#     form = FeedbackEmployeeForm(request.POST or None)
+#     employee = get_object_or_404(Employee, admin_id=request.user.id)
+#     context = {
+#         'form': form,
+#         # 'feedbacks': FeedbackEmployee.objects.filter(employee=employee),
+#         'page_title': 'Employee Feedback'
 
-    }
-    if request.method == 'POST':
-        if form.is_valid():
-            try:
-                obj = form.save(commit=False)
-                obj.employee = employee
-                obj.save()
-                messages.success(
-                    request, "Feedback submitted for review")
-                return redirect(reverse('employee_feedback'))
-            except Exception:
-                messages.error(request, "Could not Submit!")
-        else:
-            messages.error(request, "Form has errors!")
-    return render(request, "employee_template/employee_feedback.html", context)
+#     }
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             try:
+#                 obj = form.save(commit=False)
+#                 obj.employee = employee
+#                 obj.save()
+#                 messages.success(
+#                     request, "Feedback submitted for review")
+#                 return redirect(reverse('employee_feedback'))
+#             except Exception:
+#                 messages.error(request, "Could not Submit!")
+#         else:
+#             messages.error(request, "Form has errors!")
+#     return render(request, "employee_template/employee_feedback.html", context)
 
 
 def employee_view_profile(request):
@@ -205,3 +204,7 @@ def employee_view_salary(request):
         'page_title': "View Salary"
     }
     return render(request, "employee_template/employee_view_salary.html", context)
+
+def holiday_list(request):
+    holidays = Holiday.objects.all()
+    return render(request, 'main_app/holiday_list.html', {'holidays': holidays})

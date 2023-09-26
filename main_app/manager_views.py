@@ -13,9 +13,9 @@ from .models import *
 
 def manager_home(request):
     manager = get_object_or_404(Manager, admin=request.user)
-    total_employees = Employee.objects.filter(division=manager.division).count()
+    total_employees = Employee.objects.all().count()
     total_leave = LeaveReportManager.objects.filter(manager=manager).count()
-    departments = Department.objects.filter(division=manager.division)
+    departments = Department.objects.all()
     total_department = departments.count()
     attendance_list = Attendance.objects.filter(department__in=departments)
     total_attendance = attendance_list.count()
@@ -26,7 +26,7 @@ def manager_home(request):
         department_list.append(department.name)
         attendance_list.append(attendance_count)
     context = {
-        'page_title': 'Manager Panel - ' + str(manager.admin.last_name) + ' (' + str(manager.division) + ')',
+        'page_title': 'Manager Panel - ' + str(manager.admin.last_name),
         'total_employees': total_employees,
         'total_attendance': total_attendance,
         'total_leave': total_leave,
@@ -39,7 +39,7 @@ def manager_home(request):
 
 def manager_take_attendance(request):
     manager = get_object_or_404(Manager, admin=request.user)
-    departments = Department.objects.filter(division=manager.division)
+    departments = Department.objects.all()
     context = {
         'departments': departments,
         'page_title': 'Take Attendance'
@@ -53,7 +53,7 @@ def get_employees(request):
     department_id = request.POST.get('department')
     try:
         department = get_object_or_404(Department, id=department_id)
-        employees = Employee.objects.filter(division_id=department.division.id)
+        employees = Employee.objects.all()
         employee_data = []
         for employee in employees:
             data = {
@@ -98,7 +98,7 @@ def save_attendance(request):
 
 def manager_update_attendance(request):
     manager = get_object_or_404(Manager, admin=request.user)
-    departments = Department.objects.filter(division=manager.division)
+    departments = Department.objects.all()
     context = {
         'departments': departments,
         'page_title': 'Update Attendance'
@@ -168,27 +168,27 @@ def manager_apply_leave(request):
     return render(request, "manager_template/manager_apply_leave.html", context)
 
 
-def manager_feedback(request):
-    form = FeedbackManagerForm(request.POST or None)
-    manager = get_object_or_404(Manager, admin_id=request.user.id)
-    context = {
-        'form': form,
-        'feedbacks': FeedbackManager.objects.filter(manager=manager),
-        'page_title': 'Add Feedback'
-    }
-    if request.method == 'POST':
-        if form.is_valid():
-            try:
-                obj = form.save(commit=False)
-                obj.manager = manager
-                obj.save()
-                messages.success(request, "Feedback submitted for review")
-                return redirect(reverse('manager_feedback'))
-            except Exception:
-                messages.error(request, "Could not Submit!")
-        else:
-            messages.error(request, "Form has errors!")
-    return render(request, "manager_template/manager_feedback.html", context)
+# def manager_feedback(request):
+#     form = FeedbackManagerForm(request.POST or None)
+#     manager = get_object_or_404(Manager, admin_id=request.user.id)
+#     context = {
+#         'form': form,
+#         'feedbacks': FeedbackManager.objects.filter(manager=manager),
+#         'page_title': 'Add Feedback'
+#     }
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             try:
+#                 obj = form.save(commit=False)
+#                 obj.manager = manager
+#                 obj.save()
+#                 messages.success(request, "Feedback submitted for review")
+#                 return redirect(reverse('manager_feedback'))
+#             except Exception:
+#                 messages.error(request, "Could not Submit!")
+#         else:
+#             messages.error(request, "Form has errors!")
+#     return render(request, "manager_template/manager_feedback.html", context)
 
 
 def manager_view_profile(request):
@@ -255,7 +255,7 @@ def manager_view_notification(request):
 
 def manager_add_salary(request):
     manager = get_object_or_404(Manager, admin=request.user)
-    departments = Department.objects.filter(division=manager.division)
+    departments = Department.objects.all()
     context = {
         'page_title': 'Salary Upload',
         'departments': departments
