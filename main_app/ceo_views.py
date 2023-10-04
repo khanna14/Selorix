@@ -12,7 +12,23 @@ from django.views.generic import UpdateView
 
 from .forms import *
 from .models import *
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import Holiday, Attendance
 
+@receiver(post_save, sender=Holiday)
+def mark_holiday_attendance(sender, instance, **kwargs):
+    date = instance.date
+    # department = None  # You can set a default department or choose one
+    employees = Employee.objects.all()  # Fetch all employees
+
+    for employee in employees:
+        # Check if attendance for the same date and employee exists
+        existing_attendance = Attendance.objects.filter(employee=employee, date=date)
+        if not existing_attendance:
+            # Create a new attendance record
+            attendance = Attendance(employee=employee, date=date, status='holiday')
+            attendance.save()
 
 def holiday_list(request):
     holidays = Holiday.objects.all()
@@ -73,7 +89,7 @@ def add_department(request):
                 department.name = name
                 department.save()
                 messages.success(request, "Successfully Added")
-                return redirect(reverse('add_department'))
+                return redirect(reverse('manage_department'))
 
             except Exception as e:
                 messages.error(request, "Could Not Add " + str(e))
@@ -171,7 +187,7 @@ def add_employee(request):
                 user.employee.department = department
                 user.save()
                 messages.success(request, "Successfully Added")
-                return redirect(reverse('add_employee'))
+                return redirect(reverse('manage_employee'))
             except Exception as e:
                 messages.error(request, "Could Not Add: " + str(e))
         else:
@@ -290,7 +306,8 @@ def edit_employee(request, employee_id):
                 user.save()
                 employee.save()
                 messages.success(request, "Successfully Updated")
-                return redirect(reverse('edit_employee', args=[employee_id]))
+                # return redirect(reverse('edit_employee', args=[employee_id]))
+                return redirect(reverse('manage_employee'))
             except Exception as e:
                 messages.error(request, "Could Not Update " + str(e))
         else:

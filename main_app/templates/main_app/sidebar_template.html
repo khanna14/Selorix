@@ -4,8 +4,6 @@
     <!-- Brand Logo -->
 
    
-
-
     <!-- Sidebar -->
     <div class="sidebar">
 
@@ -48,7 +46,7 @@
                 </li>
 
 
-                <li class="nav-item">
+                {% comment %} <li class="nav-item">
                     {% url 'manage_manager' as manage_manager %}
                     {% url 'edit_manager' manager_id as edit_manager %}
                     <a href="{{manage_manager}}"
@@ -59,7 +57,7 @@
 
                         </p>
                     </a>
-                </li>
+                </li> {% endcomment %}
 
                 <li class="nav-item">
                     {% url 'manage_employee' as manage_employee %}
@@ -158,7 +156,7 @@
                         </p>
                     </a>
                 </li>   
-                <li class="nav-item">
+                {% comment %} <li class="nav-item">
                     {% url 'view_manager_leave' as view_manager_leave %}
 
                     <a href="{{view_manager_leave}}"
@@ -168,7 +166,7 @@
                             Manager Leave
                         </p>
                     </a>
-                </li>
+                </li> {% endcomment %}
                 <li class="nav-item">
                     {% url 'view_employee_leave' as view_employee_leave %}
 
@@ -176,12 +174,12 @@
                         class="nav-link  {% if view_employee_leave == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                            Employee Leave
+                            Leaves
 
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                {% comment %} <li class="nav-item">
                     {% url 'admin_notify_manager' as admin_notify_manager %}
                     <a href="{{admin_notify_manager}}"
                         class="nav-link {% if admin_notify_manager == request.path %} active {% endif %}">
@@ -191,19 +189,23 @@
 
                         </p>
                     </a>
-                </li>
+                </li> {% endcomment %}
                 <li class="nav-item">
                     {% url 'admin_notify_employee' as admin_notify_employee %}
                     <a href="{{admin_notify_employee}}"
                         class="nav-link {% if admin_notify_employee == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                            Notify Employee
+                            Send Notifications
 
                         </p>
                     </a>
                 </li>
-                {% elif request.user.user_type == '2' %}
+
+
+
+
+                {% comment %} {% elif request.user.user_type == '2' %}
                 <!-- Brand Logo -->
                 <a href="#" class="brand-link">
                     <img src="{% static 'dist/img/AdminLTELogo.png' %} " alt="AdminLTE Logo"
@@ -330,7 +332,7 @@
 
                                     </p>
                                 </a>
-                            </li>
+                            </li> {% endcomment %}
 
                             {% else %}
                             <!-- Brand Logo -->
@@ -377,7 +379,7 @@
                                                 class="nav-link {% if employee_view_profile == request.path %} active {% endif %}">
                                                 <i class="nav-icon fas fa-th"></i>
                                                 <p>
-                                                    View/Edit Profile
+                                                    Profile
 
                                                 </p>
                                             </a>
@@ -410,7 +412,6 @@
                                                 <i class="nav-icon fas fa-th"></i>
                                                 <p>
                                                     View Notifications
-
                                                 </p>
                                             </a>
                                         </li>
@@ -438,7 +439,7 @@
                                             </a>
                                         </li>
 
-                                        <li class="nav-item">
+                                        {% comment %} <li class="nav-item">
                                             {% url 'employee_feedback' as employee_feedback %}
                                             <a href="{{employee_feedback}}"
                                                 class="nav-link {% if employee_feedback == request.path %} active {% endif %}">
@@ -447,7 +448,7 @@
                                                     Feedback
                                                 </p>
                                             </a>
-                                        </li>
+                                        </li> {% endcomment %}
 
                                         {% endif %}
 

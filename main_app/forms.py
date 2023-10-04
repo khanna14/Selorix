@@ -64,7 +64,7 @@ class EmployeeForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Employee
         fields = CustomUserForm.Meta.fields + \
-            ['manager']
+            ['department']
 
 
 class AdminForm(CustomUserForm):

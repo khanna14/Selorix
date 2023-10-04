@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import *
 from .models import *
 
-
+@ csrf_exempt
 def employee_home(request):
     employee = get_object_or_404(Employee, admin=request.user)
     total_department = Department.objects.all().count()

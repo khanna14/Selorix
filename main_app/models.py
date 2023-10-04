@@ -74,8 +74,8 @@ class Manager(models.Model):
 
 class Employee(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING, null=True, blank=False)
-    # department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    # manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING, null=True, blank=False)
+    department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
 
     def __str__(self):
         return self.admin.last_name + ", " + self.admin.first_name
@@ -89,7 +89,8 @@ class Attendance(models.Model):
         ('holiday', 'Holiday'),
     )
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    # manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
     date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
