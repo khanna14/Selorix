@@ -1,0 +1,72 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-6">
+                                <!-- <h3 class="card-title">{{page_title}}</h3> -->
+                            </div>
+                            {% url 'manager_add_salary' as manager_add_salary%}
+                            <div class="col-6 text-right">
+                                <a href="{{manager_add_salary}}" class="nav-link  {% if manager_add_salary == request.path %} active {% endif %}">
+                                    <button type="button" class="btn btn-warning">
+                                        Add Salary
+                                    </button>
+                                </a>
+                            </div>  
+                        </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>SN</th>
+                                    <th>Full Name</th>
+                                    {% comment %} <th>Email</th> {% endcomment %}
+                                    {% comment %} <th>Gender</th> {% endcomment %}
+                                    {% comment %} <th>Division</th> {% endcomment %}
+                                    <th>Department</th>
+                                    <th>Salary</th>
+                                    <th>Edit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for salary in salarys %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{salary.employee.admin.first_name|capfirst}} {{salary.employee.admin.last_name|capfirst}}</td>
+                                    {% comment %} <td>{{employee.email}}</td>
+                                    <td>{{employee.gender}}</td>
+                                    <td>{{employee.employee.division.name}}</td> {% endcomment %}
+                                    <td>{{salary.employee.department.name}}</td>
+                                    <td>{{salary.base}}</td>
+                                    {% comment %} <td>
+                                        {% if employee.profile_pic == "" %}
+                                            No Image    
+                                        {% else %}
+                                            <img class="img-fluid rounded-circle" style="max-height: 100px; max-width: 100px;" src="{{ employee.profile_pic }}" alt="">
+                                        {% endif %}
+                                    </td>                                     {% endcomment %}
+                                    
+                                    <td><a href="{% url 'edit_employee' salary.employee.admin.employee.id %}" class="btn btn-warning">Edit</a>
+                                        
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

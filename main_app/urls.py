@@ -46,8 +46,8 @@ urlpatterns = [
     #      name="manager_feedback_message",),
     path("employee/view/leave/", ceo_views.view_employee_leave,
          name="view_employee_leave",),
-    path("manager/view/leave/", ceo_views.view_manager_leave,
-         name="view_manager_leave",),
+    #     path("manager/view/leave/", ceo_views.view_manager_leave,
+    #          name="view_manager_leave",),
     path("attendance/view/", ceo_views.admin_view_attendance,
          name="admin_view_attendance",),
     path("attendance/fetch/", ceo_views.get_admin_attendance,
@@ -56,7 +56,7 @@ urlpatterns = [
     path("department/add/", ceo_views.add_department, name='add_department'),
     path("manager/manage/", ceo_views.manage_manager, name='manage_manager'),
     path("employee/manage/", ceo_views.manage_employee, name='manage_employee'),
-#     path("division/manage/", ceo_views.manage_division, name='manage_division'),   #### To be Removed
+    #     path("division/manage/", ceo_views.manage_division, name='manage_division'),   #### To be Removed
     path("department/manage/", ceo_views.manage_department,
          name='manage_department'),
     path("manager/edit/<int:manager_id>",
@@ -71,6 +71,18 @@ urlpatterns = [
          ceo_views.add_edit_holiday, name='edit_holiday'),
     path('holiday/delete/<int:holiday_id>/',
          ceo_views.delete_holiday, name='delete_holiday'),
+
+
+    path("manager/salary/add/", ceo_views.manager_add_salary,
+         name='manager_add_salary'),
+    path("manager/salary/edit/", EditSalaryView.as_view(),
+         name='edit_employee_salary'),
+         
+    path('manager/salary/fetch/', ceo_views.fetch_employee_salary,
+         name='fetch_employee_salary'),
+    path('ceo/salary/fetch/all', ceo_views.get_all_employee_salary,
+         name='get_all_employee_salary'),
+
 
 
     # path("division/delete/<int:division_id>",
@@ -91,8 +103,8 @@ urlpatterns = [
 
     # Manager
     path("manager/home/", manager_views.manager_home, name='manager_home'),
-    path("manager/apply/leave/", manager_views.manager_apply_leave,
-         name='manager_apply_leave'),
+    #     path("manager/apply/leave/", manager_views.manager_apply_leave,
+    #          name='manager_apply_leave'),
     # path("manager/feedback/", manager_views.manager_feedback,
     #      name='manager_feedback'),
     path("manager/view/profile/", manager_views.manager_view_profile,
@@ -113,12 +125,12 @@ urlpatterns = [
          name='manager_fcmtoken'),
     path("manager/view/notification/", manager_views.manager_view_notification,
          name="manager_view_notification"),
-    path("manager/salary/add/", manager_views.manager_add_salary,
-         name='manager_add_salary'),
-    path("manager/salary/edit/", EditSalaryView.as_view(),
-         name='edit_employee_salary'),
-    path('manager/salary/fetch/', manager_views.fetch_employee_salary,
-         name='fetch_employee_salary'),
+    #     path("manager/salary/add/", manager_views.manager_add_salary,
+    #          name='manager_add_salary'),
+    #     path("manager/salary/edit/", EditSalaryView.as_view(),
+    #          name='edit_employee_salary'),
+    #     path('manager/salary/fetch/', manager_views.fetch_employee_salary,
+    #          name='fetch_employee_salary'),
 
 
 
@@ -138,5 +150,6 @@ urlpatterns = [
          name="employee_view_notification"),
     path('employee/view/salary/', employee_views.employee_view_salary,
          name='employee_view_salary'),
-     path('employee/view/holiday', employee_views.holiday_list, name='employee_holiday_list'),
+    path('employee/view/holiday', employee_views.holiday_list,
+         name='employee_holiday_list'),
 ]

@@ -105,16 +105,16 @@ class DepartmentForm(FormSettings):
         fields = ['name']
 
 
-class LeaveReportManagerForm(FormSettings):
-    def __init__(self, *args, **kwargs):
-        super(LeaveReportManagerForm, self).__init__(*args, **kwargs)
+# class LeaveReportManagerForm(FormSettings):
+#     def __init__(self, *args, **kwargs):
+#         super(LeaveReportManagerForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = LeaveReportManager
-        fields = ['date', 'message']
-        widgets = {
-            'date': DateInput(attrs={'type': 'date'}),
-        }
+#     class Meta:
+#         model = LeaveReportManager
+#         fields = ['date', 'message']
+#         widgets = {
+#             'date': DateInput(attrs={'type': 'date'}),
+#         }
 
 
 # class FeedbackManagerForm(FormSettings):

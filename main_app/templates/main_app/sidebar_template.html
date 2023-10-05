@@ -34,6 +34,40 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    {% url 'manager_add_salary' as manager_add_salary %}
+                    <a href="{{manager_add_salary}}"
+                        class="nav-link {% if manager_add_salary == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            Add Salary
+
+                        </p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'edit_employee_salary' as edit_employee_salary %}
+                    <a href="{{edit_employee_salary}}"
+                        class="nav-link {% if edit_employee_salary == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            Edit Salary
+
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    {% url 'get_all_employee_salary' as get_all_employee_salary %}
+                    <a href="{{get_all_employee_salary}}"
+                        class="nav-link {% if get_all_employee_salary == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            all Salary
+
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     {% url 'admin_view_profile' as admin_view_profile %}
                     <a href="{{admin_view_profile}}"
                         class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">

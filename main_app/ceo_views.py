@@ -391,29 +391,29 @@ def check_email_availability(request):
 #         except Exception as e:
 #             return HttpResponse(False)
 
-@csrf_exempt
-def view_manager_leave(request):
-    if request.method != 'POST':
-        allLeave = LeaveReportManager.objects.all()
-        context = {
-            'allLeave': allLeave,
-            'page_title': 'Leave Applications From Manager'
-        }
-        return render(request, "ceo_template/manager_leave_view.html", context)
-    else:
-        id = request.POST.get('id')
-        status = request.POST.get('status')
-        if (status == '1'):
-            status = 1
-        else:
-            status = -1
-        try:
-            leave = get_object_or_404(LeaveReportManager, id=id)
-            leave.status = status
-            leave.save()
-            return HttpResponse(True)
-        except Exception as e:
-            return False
+# @csrf_exempt
+# def view_manager_leave(request):
+#     if request.method != 'POST':
+#         allLeave = LeaveReportManager.objects.all()
+#         context = {
+#             'allLeave': allLeave,
+#             'page_title': 'Leave Applications From Manager'
+#         }
+#         return render(request, "ceo_template/manager_leave_view.html", context)
+#     else:
+#         id = request.POST.get('id')
+#         status = request.POST.get('status')
+#         if (status == '1'):
+#             status = 1
+#         else:
+#             status = -1
+#         try:
+#             leave = get_object_or_404(LeaveReportManager, id=id)
+#             leave.status = status
+#             leave.save()
+#             return HttpResponse(True)
+#         except Exception as e:
+#             return False
 
 
 @csrf_exempt
@@ -603,3 +603,60 @@ def delete_holiday(request, holiday_id):
     messages.success(request, "Holiday deleted successfully!")
     return redirect(reverse('holiday_list'))
 
+
+
+def manager_add_salary(request):
+    # manager = get_object_or_404(Manager, admin=request.user)
+    departments = Department.objects.all()
+    context = {
+        'page_title': 'Salary Upload',
+        'departments': departments
+    }
+    if request.method == 'POST':
+        try:
+            employee_id = request.POST.get('employee_list')
+            department_id = request.POST.get('department')
+            base = request.POST.get('base')
+            ctc = request.POST.get('ctc')
+            employee = get_object_or_404(Employee, id=employee_id)
+            department = get_object_or_404(Department, id=department_id)
+            try:
+                data = EmployeeSalary.objects.get(
+                    employee=employee, department=department)
+                data.ctc = ctc
+                data.base = base
+                data.save()
+                messages.success(request, "Scores Updated")
+            except:
+                salary = EmployeeSalary(employee=employee, department=department, base=base, ctc=ctc)
+                salary.save()
+                messages.success(request, "Scores Saved")
+        except Exception as e:
+            messages.warning(request, "Error Occured While Processing Form")
+    return render(request, "manager_template/manager_add_salary.html", context)
+
+
+@csrf_exempt
+def fetch_employee_salary(request):
+    try:
+        department_id = request.POST.get('department')
+        employee_id = request.POST.get('employee')
+        employee = get_object_or_404(Employee, id=employee_id)
+        department = get_object_or_404(Department, id=department_id)
+        salary = EmployeeSalary.objects.get(employee=employee, department=department)
+        salary_data = {
+            'ctc': salary.ctc,
+            'base': salary.base
+        }
+        return HttpResponse(json.dumps(salary_data))
+    except Exception as e:
+        return HttpResponse('False')
+
+def get_all_employee_salary(request):
+    # employee = get_object_or_404(Employee, admin=request.user)
+    salarys = EmployeeSalary.objects.all()
+    context = {
+        'salarys': salarys,
+        'page_title': "All Salary"
+    }
+    return render(request, "ceo_template/manage_employee_salary.html", context)

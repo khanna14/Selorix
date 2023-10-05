@@ -14,7 +14,7 @@ from .models import *
 def manager_home(request):
     manager = get_object_or_404(Manager, admin=request.user)
     total_employees = Employee.objects.all().count()
-    total_leave = LeaveReportManager.objects.filter(manager=manager).count()
+    # total_leave = LeaveReportManager.objects.filter(manager=manager).count()
     departments = Department.objects.all()
     total_department = departments.count()
     attendance_list = Attendance.objects.filter(department__in=departments)
@@ -29,7 +29,7 @@ def manager_home(request):
         'page_title': 'Manager Panel - ' + str(manager.admin.last_name),
         'total_employees': total_employees,
         'total_attendance': total_attendance,
-        'total_leave': total_leave,
+        # 'total_leave': total_leave,
         'total_department': total_department,
         'department_list': department_list,
         'attendance_list': attendance_list
@@ -144,28 +144,28 @@ def update_attendance(request):
     return HttpResponse("OK")
 
 
-def manager_apply_leave(request):
-    form = LeaveReportManagerForm(request.POST or None)
-    manager = get_object_or_404(Manager, admin_id=request.user.id)
-    context = {
-        'form': form,
-        'leave_history': LeaveReportManager.objects.filter(manager=manager),
-        'page_title': 'Apply for Leave'
-    }
-    if request.method == 'POST':
-        if form.is_valid():
-            try:
-                obj = form.save(commit=False)
-                obj.manager = manager
-                obj.save()
-                messages.success(
-                    request, "Application for leave has been submitted for review")
-                return redirect(reverse('manager_apply_leave'))
-            except Exception:
-                messages.error(request, "Could not apply!")
-        else:
-            messages.error(request, "Form has errors!")
-    return render(request, "manager_template/manager_apply_leave.html", context)
+# def manager_apply_leave(request):
+#     form = LeaveReportManagerForm(request.POST or None)
+#     manager = get_object_or_404(Manager, admin_id=request.user.id)
+#     context = {
+#         'form': form,
+#         'leave_history': LeaveReportManager.objects.filter(manager=manager),
+#         'page_title': 'Apply for Leave'
+#     }
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             try:
+#                 obj = form.save(commit=False)
+#                 obj.manager = manager
+#                 obj.save()
+#                 messages.success(
+#                     request, "Application for leave has been submitted for review")
+#                 return redirect(reverse('manager_apply_leave'))
+#             except Exception:
+#                 messages.error(request, "Could not apply!")
+#         else:
+#             messages.error(request, "Form has errors!")
+#     return render(request, "manager_template/manager_apply_leave.html", context)
 
 
 # def manager_feedback(request):
@@ -254,7 +254,7 @@ def manager_view_notification(request):
 
 
 def manager_add_salary(request):
-    manager = get_object_or_404(Manager, admin=request.user)
+    # manager = get_object_or_404(Manager, admin=request.user)
     departments = Department.objects.all()
     context = {
         'page_title': 'Salary Upload',

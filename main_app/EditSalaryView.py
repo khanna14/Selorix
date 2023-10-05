@@ -9,8 +9,8 @@ from django.urls import reverse
 class EditSalaryView(View):
     def get(self, request, *args, **kwargs):
         salaryForm = EditSalaryForm()
-        manager = get_object_or_404(Manager, admin=request.user)
-        salaryForm.fields['department'].queryset = Department.objects.filter(division=manager.division)
+        # employee = get_object_or_404(Employee, admin=request.user)
+        # salaryForm.fields['department'].queryset = Department.objects.filter(division=employee.department)
         context = {
             'form': salaryForm,
             'page_title': "Edit Employee's Salary"

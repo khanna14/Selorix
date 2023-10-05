@@ -49,7 +49,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.last_name + ", " + self.first_name
+        return self.admin.first_name + ", " + self.admin.last_name
 
 
 class Admin(models.Model):
@@ -69,8 +69,7 @@ class Manager(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.admin.last_name + " " + self.admin.first_name
-
+        return self.admin.first_name + ", " + self.admin.last_name
 
 class Employee(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
@@ -78,7 +77,7 @@ class Employee(models.Model):
     department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
 
     def __str__(self):
-        return self.admin.last_name + ", " + self.admin.first_name
+        return self.admin.first_name + ", " + self.admin.last_name
 
 
 class Attendance(models.Model):
@@ -111,13 +110,13 @@ class LeaveReportEmployee(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-class LeaveReportManager(models.Model):
-    manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
-    date = models.CharField(max_length=60)
-    message = models.TextField()
-    status = models.SmallIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# class LeaveReportManager(models.Model):
+#     manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
+#     date = models.CharField(max_length=60)
+#     message = models.TextField()
+#     status = models.SmallIntegerField(default=0)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
 
 # class FeedbackEmployee(models.Model):
