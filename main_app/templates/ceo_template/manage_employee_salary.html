@@ -10,19 +10,35 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <div class="row">
+                        <div class="row ">
+                            {% comment %}
                             <div class="col-6">
                                 <!-- <h3 class="card-title">{{page_title}}</h3> -->
                             </div>
-                            {% url 'manager_add_salary' as manager_add_salary%}
-                            <div class="col-6 text-right">
-                                <a href="{{manager_add_salary}}" class="nav-link  {% if manager_add_salary == request.path %} active {% endif %}">
+                            {% endcomment %}
+                            {% url 'manager_add_salary' as manager_add_salary %}
+                            <div class="col-6  ">
+                                <a href="{{ manager_add_salary }}" class="nav-link {% if manager_add_salary == request.path %} active {% endif %}">
                                     <button type="button" class="btn btn-warning">
                                         Add Salary
                                     </button>
                                 </a>
-                            </div>  
+                            </div>
+                        
+                                <div class="col-6 ">
+                            {% url 'edit_employee_salary' as edit_employee_salary %}
+                           
+                                <a href="{{ edit_employee_salary }}" class="nav-link {% if edit_employee_salary == request.path %} active {% endif %}">
+                                    <button type="button" class="btn btn-warning">
+                                        Edit Salary
+                                    </button>
+                                </a>
+                           
                         </div>
+                        
+                        </div>
+                        
+                        
                     <!-- /.card-header -->
                     <div class="card-body">
                         <table id="example2" class="table table-bordered table-hover">
@@ -30,12 +46,12 @@
                                 <tr>
                                     <th>SN</th>
                                     <th>Full Name</th>
-                                    {% comment %} <th>Email</th> {% endcomment %}
-                                    {% comment %} <th>Gender</th> {% endcomment %}
-                                    {% comment %} <th>Division</th> {% endcomment %}
+                                    <!-- {% comment %} <th>Email</th> {% endcomment %} -->
+                                    <!-- {% comment %} <th>Gender</th> {% endcomment %} -->
+                                    <!-- {% comment %} <th>Division</th> {% endcomment %} -->
                                     <th>Department</th>
                                     <th>Salary</th>
-                                    <th>Edit</th>
+                                    <!-- {% comment %} <th>Edit</th> {% endcomment %} -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -43,12 +59,12 @@
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
                                     <td>{{salary.employee.admin.first_name|capfirst}} {{salary.employee.admin.last_name|capfirst}}</td>
-                                    {% comment %} <td>{{employee.email}}</td>
+                                    <!-- {% comment %} <td>{{employee.email}}</td> -->
                                     <td>{{employee.gender}}</td>
-                                    <td>{{employee.employee.division.name}}</td> {% endcomment %}
+                                    <!-- <td>{{employee.employee.division.name}}</td> {% endcomment %} -->
                                     <td>{{salary.employee.department.name}}</td>
                                     <td>{{salary.base}}</td>
-                                    {% comment %} <td>
+                                    <!-- {% comment %} <td>
                                         {% if employee.profile_pic == "" %}
                                             No Image    
                                         {% else %}
@@ -56,7 +72,7 @@
                                         {% endif %}
                                     </td>                                     {% endcomment %}
                                     
-                                    <td><a href="{% url 'edit_employee' salary.employee.admin.employee.id %}" class="btn btn-warning">Edit</a>
+                                    {% comment %} <td><a href="{% url 'edit_employee' salary.employee.admin.employee.id %}" class="btn btn-warning">Edit</a> {% endcomment %} -->
                                         
                                     </td>
                                 </tr>

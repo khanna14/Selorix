@@ -39,7 +39,7 @@
 
                     <!-- /.card-header -->
                     <!-- form start -->
-                    <div class="card-body">
+                    <!-- <div class="card-body">
 
 
 
@@ -48,7 +48,7 @@
                             <select name="department" class="form-control" id='department'>
                                 <option value="">----</option>
                                 {% for department in departments  %}
-                                <option value="{{department.id}}">{{department.name}}</option>
+                                <option value="{{department.first_name}}">{{department.first_name}}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -56,30 +56,46 @@
                                 <div class="alert alert-success" id='success_attendance' style="display: none;"></div>
                              <button type="button" id='fetch_attendance' class="btn btn-warning btn-block">Fetch
                                     Attendance</button>
-                        </div>
+                        </div> -->
                     <!-- /.card-body -->
                     
-                        
-                               
-                            <div class="form-group" style="display: none;" id="attendance_block">
-                            <div class="form-group">
-                                <label>Attendance Date</label>
-                                <select name="attendance_date" id='attendance_date' class="form-control">
-                               
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                
-                            <div id="fetch_employee_block" style="display: none;">
-                                <button type="button" id='fetch_employee' class="btn btn-warning btn-block">Fetch Employees</button>
-
-
-                            </div>
-                            <div id='employee_data' class="card-footer">
-
-                            </div>
-                        </div>
-                    </div>  
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>SN</th>
+                                    <th>Full Name</th>
+                                    <!-- {% comment %} <th>Email</th> {% endcomment %} -->
+                                    <!-- {% comment %} <th>Gender</th> {% endcomment %} -->
+                                    <!-- {% comment %} <th>Division</th> {% endcomment %} -->
+                                    <th>Department</th>
+                                    <th>Attendance</th>
+                                    {% comment %} <th>Edit</th> {% endcomment %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for department in departments %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{department.admin.first_name|capfirst}} {{department.admin.last_name|capfirst}}</td>
+                                    <td>{{department.department.name}}</td>
+                                    <td>{{department.attendance_date}}</td>
+                                    <!-- {% comment %} <td>
+                                        {% if employee.profile_pic == "" %}
+                                            No Image    
+                                        {% else %}
+                                            <img class="img-fluid rounded-circle" style="max-height: 100px; max-width: 100px;" src="{{ employee.profile_pic }}" alt="">
+                                        {% endif %}
+                                    </td>                                     {% endcomment %}
+                                    
+                                    {% comment %} <td><a href="{% url 'edit_employee' salary.employee.admin.employee.id %}" class="btn btn-warning">Edit</a> {% endcomment %} -->
+                                        
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <!-- /.card -->
 
@@ -91,7 +107,7 @@
 
 
 {% block custom_js %}
-<script>
+<!-- <script>
     $(document).ready(function () {
         $("#fetch_attendance").click(function(){
             var department = $("#department").val()
@@ -188,5 +204,5 @@ if (attendance_date.length  == 0){
         })
        
     })
-</script>
+</script> -->
 {% endblock custom_js %}

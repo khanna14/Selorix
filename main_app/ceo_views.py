@@ -442,7 +442,7 @@ def view_employee_leave(request):
 
 
 def admin_view_attendance(request):
-    departments = Department.objects.all()
+    departments = Employee.objects.all()
     context = {
         'departments': departments,
         'page_title': 'View Attendance'
@@ -599,6 +599,16 @@ def delete_department(request, department_id):
 
 def delete_holiday(request, holiday_id):
     holiday = get_object_or_404(Holiday, id=holiday_id)
+    date = holiday.date
+    # department = None  # You can set a default department or choose one
+    employees = Employee.objects.all()  # Fetch all employees
+
+    for employee in employees:
+        # Check if attendance for the same date and employee exists
+        Attendance.objects.filter(employee=employee, date=date).delete()
+    
+    
+    
     holiday.delete()
     messages.success(request, "Holiday deleted successfully!")
     return redirect(reverse('holiday_list'))
@@ -626,11 +636,12 @@ def manager_add_salary(request):
                 data.ctc = ctc
                 data.base = base
                 data.save()
-                messages.success(request, "Scores Updated")
+                messages.success(request, "Salary Updated")
             except:
                 salary = EmployeeSalary(employee=employee, department=department, base=base, ctc=ctc)
                 salary.save()
-                messages.success(request, "Scores Saved")
+                messages.success(request, "Salary Saved")
+                return redirect(reverse('get_all_employee_salary'))
         except Exception as e:
             messages.warning(request, "Error Occured While Processing Form")
     return render(request, "manager_template/manager_add_salary.html", context)

@@ -138,6 +138,8 @@ urlpatterns = [
     path("employee/home/", employee_views.employee_home, name='employee_home'),
     path("employee/view/attendance/", employee_views.employee_view_attendance,
          name='employee_view_attendance'),
+    path("employee/mark/attendance/", employee_views.employee_mark_attendance,
+         name='employee_mark_attendance'),
     path("employee/apply/leave/", employee_views.employee_apply_leave,
          name='employee_apply_leave'),
     # path("employee/feedback/", employee_views.employee_feedback,

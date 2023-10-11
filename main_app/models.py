@@ -88,12 +88,12 @@ class Attendance(models.Model):
         ('holiday', 'Holiday'),
     )
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    # department = models.ForeignKey(Department, on_delete=models.CASCADE)
     # manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
     date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
 class AttendanceReport(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.DO_NOTHING)

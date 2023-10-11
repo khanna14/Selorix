@@ -175,6 +175,17 @@ class EditSalaryForm(FormSettings):
         model = EmployeeSalary
         fields = ['department', 'employee', 'base', 'ctc']
 
+class MarkAttendanceForm(FormSettings):
+    # def __init__(self, *args, **kwargs):
+    #     super(Attendance, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Attendance
+        fields = ['date', 'status']
+        widgets = {
+            'date': DateInput(attrs={'type': 'date'}),
+        }
+
 
 class HolidayForm(forms.ModelForm):
     class Meta:

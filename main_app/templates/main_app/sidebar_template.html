@@ -33,7 +33,7 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                {% comment %} <li class="nav-item">
                     {% url 'manager_add_salary' as manager_add_salary %}
                     <a href="{{manager_add_salary}}"
                         class="nav-link {% if manager_add_salary == request.path %} active {% endif %}">
@@ -43,9 +43,9 @@
 
                         </p>
                     </a>
-                </li>
+                </li> {% endcomment %}
 
-                <li class="nav-item">
+                {% comment %} <li class="nav-item">
                     {% url 'edit_employee_salary' as edit_employee_salary %}
                     <a href="{{edit_employee_salary}}"
                         class="nav-link {% if edit_employee_salary == request.path %} active {% endif %}">
@@ -55,14 +55,14 @@
 
                         </p>
                     </a>
-                </li>
+                </li> {% endcomment %}
                 <li class="nav-item">
                     {% url 'get_all_employee_salary' as get_all_employee_salary %}
                     <a href="{{get_all_employee_salary}}"
                         class="nav-link {% if get_all_employee_salary == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                            all Salary
+                            Employee Salary
 
                         </p>
                     </a>
@@ -386,7 +386,7 @@
                                             alt="User Image">
                                     </div>
                                     <div class="info">
-                                        <a href="#" class="d-block">{{user}}</a>
+                                        <a href="#" class="d-block">{{user.first_name|capfirst}} {{user.last_name|capfirst}}</a>
                                     </div>
                                 </div>
 
@@ -414,6 +414,18 @@
                                                 <i class="nav-icon fas fa-th"></i>
                                                 <p>
                                                     Profile
+
+                                                </p>
+                                            </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            {% url 'employee_mark_attendance' as employee_mark_attendance %}
+                                            <a href="{{employee_mark_attendance}}"
+                                                class="nav-link {% if employee_mark_attendance == request.path %} active {% endif %}">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Mark Attendance
 
                                                 </p>
                                             </a>
@@ -450,10 +462,10 @@
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            {% url 'holiday_list' as holiday_list %}
+                                            {% url 'employee_holiday_list' as employee_holiday_list %}
                         
-                                            <a href="{{holiday_list}}"
-                                                class="nav-link  {% if holiday_list == request.path %} active {% endif %}">
+                                            <a href="{{employee_holiday_list}}"
+                                                class="nav-link  {% if employee_holiday_list == request.path %} active {% endif %}">
                                                 <i class="nav-icon fas fa-th"></i>
                                                 <p>
                                                     Holiday List

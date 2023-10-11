@@ -28,17 +28,19 @@ def doLogin(request, **kwargs):
         return HttpResponse("<h4>Denied</h4>")
     else:
         #Google recaptcha
-        captcha_token = request.POST.get('g-recaptcha-response')
-        captcha_url = "https://www.google.com/recaptcha/api/siteverify"
-        captcha_key = "6Lf9RfcnAAAAAIn2o_U8h3KQwb3lVMeDvenBCXYp"
-        data = {
-            'secret': captcha_key,
-            'response': captcha_token
-        }
+        response = {}
+        response['success'] = True
+        # captcha_token = request.POST.get('g-recaptcha-response')
+        # captcha_url = "https://www.google.com/recaptcha/api/siteverify"
+        # captcha_key = "6Lf9RfcnAAAAAIn2o_U8h3KQwb3lVMeDvenBCXYp"
+        # data = {
+        #     'secret': captcha_key,
+        #     'response': captcha_token
+        # }
         # Make request
         try:
-            captcha_server = requests.post(url=captcha_url, data=data)
-            response = json.loads(captcha_server.text)
+            # captcha_server = requests.post(url=captcha_url, data=data)
+            # response = json.loads(captcha_server.text)
             if response['success'] == False:
                 messages.error(request, 'Invalid Captcha. Try Again')
                 return redirect('/')

@@ -17,30 +17,33 @@ from .models import *
 def employee_home(request):
     employee = get_object_or_404(Employee, admin=request.user)
     total_department = Department.objects.all().count()
-    total_attendance = AttendanceReport.objects.filter(employee=employee).count()
-    total_present = AttendanceReport.objects.filter(employee=employee, status=True).count()
-    if total_attendance == 0:  # Don't divide. DivisionByZero
-        percent_absent = percent_present = 0
-    else:
-        percent_present = math.floor((total_present/total_attendance) * 100)
-        percent_absent = math.ceil(100 - percent_present)
+    # total_attendance = AttendanceReport.objects.filter(employee=employee).count()
+    # total_present = AttendanceReport.objects.filter(employee=employee, status=True).count()
+    # if total_attendance == 0:  # Don't divide. DivisionByZero
+    #     percent_absent = percent_present = 0
+    # else:
+    #     percent_present = math.floor((total_present/total_attendance) * 100)
+    #     percent_absent = math.ceil(100 - percent_present)
     department_name = []
     data_present = []
     data_absent = []
     departments = Department.objects.all()
-    for department in departments:
-        attendance = Attendance.objects.filter(department=department)
-        present_count = AttendanceReport.objects.filter(
-            attendance__in=attendance, status=True, employee=employee).count()
-        absent_count = AttendanceReport.objects.filter(
-            attendance__in=attendance, status=False, employee=employee).count()
-        department_name.append(department.name)
-        data_present.append(present_count)
-        data_absent.append(absent_count)
+    # for department in departments:
+    #     attendance = Attendance.objects.filter(department=department)
+    #     present_count = AttendanceReport.objects.filter(
+    #         attendance__in=attendance, status=True, employee=employee).count()
+    #     absent_count = AttendanceReport.objects.filter(
+    #         attendance__in=attendance, status=False, employee=employee).count()
+    #     department_name.append(department.name)
+    #     data_present.append(present_count)
+    #     data_absent.append(absent_count)
     context = {
-        'total_attendance': total_attendance,
-        'percent_present': percent_present,
-        'percent_absent': percent_absent,
+        # 'total_attendance': total_attendance,
+        # 'percent_present': percent_present,
+        # 'percent_absent': percent_absent,
+        'total_attendance': "Dummy",
+        'percent_present': "Dummy",
+        'percent_absent': "Dummy",
         'total_department': total_department,
         'departments': departments,
         'data_present': data_present,
@@ -83,6 +86,30 @@ def employee_view_attendance(request):
             return JsonResponse(json.dumps(json_data), safe=False)
         except Exception as e:
             return None
+
+
+def employee_mark_attendance(request):
+    form = MarkAttendanceForm(request.POST or None)
+    employee = get_object_or_404(Employee, admin_id=request.user.id)
+    context = {
+        'form': form,
+        'attendance_history': Attendance.objects.filter(employee=employee),
+        'page_title': 'Mark Attendance'
+    }
+    if request.method == 'POST':
+        if form.is_valid():
+            try:
+                obj = form.save(commit=False)
+                obj.employee = employee
+                obj.save()
+                messages.success(
+                    request, "Marked")
+                return redirect(reverse('employee_mark_attendance'))
+            except Exception:
+                messages.error(request, "Could not submit")
+        else:
+            messages.error(request, "Form has errors!")
+    return render(request, "employee_template/employee_mark_attendance.html", context)
 
 
 def employee_apply_leave(request):
