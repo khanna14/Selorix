@@ -87,7 +87,6 @@ def employee_view_attendance(request):
         except Exception as e:
             return None
 
-
 def employee_mark_attendance(request):
     form = MarkAttendanceForm(request.POST or None)
     employee = get_object_or_404(Employee, admin_id=request.user.id)
@@ -99,11 +98,23 @@ def employee_mark_attendance(request):
     if request.method == 'POST':
         if form.is_valid():
             try:
-                obj = form.save(commit=False)
-                obj.employee = employee
-                obj.save()
-                messages.success(
-                    request, "Marked")
+                attendance_date = form.cleaned_data['date']
+                existing_attendance = Attendance.objects.filter(employee=employee, date=attendance_date).first()
+                
+                if existing_attendance:
+                    # Update existing attendance record
+                    existing_attendance.status = form.cleaned_data['status']
+                    existing_attendance.save()
+                else:
+                    # Create a new attendance record
+                    obj = form.save(commit=False)
+                    obj.employee = employee
+                    obj.save()
+                
+                # Handle leave approval and auto-updating attendance status here
+                # ...
+                
+                messages.success(request, "Marked")
                 return redirect(reverse('employee_mark_attendance'))
             except Exception:
                 messages.error(request, "Could not submit")

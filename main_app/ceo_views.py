@@ -15,6 +15,48 @@ from .models import *
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Holiday, Attendance
+from excel_response import ExcelResponse
+from datetime import date, timedelta
+import datetime
+
+def view_attendance_excel(request, employee_id):
+    employee_id-=1
+    employee = get_object_or_404(Employee, id=employee_id)
+    attendance_data = Attendance.objects.filter(employee_id=employee_id)
+    created_at = employee.admin.created_at.date()
+    current_date = date.today()
+    all_dates = [created_at + timedelta(days=i) for i in range((current_date - created_at).days + 1)]
+
+    context = {
+        'employee': employee,
+        'all_dates' : all_dates,
+        'attendance_data': attendance_data,
+    }
+
+    return render(request, 'ceo_template/employee_attendance.html', context)
+
+def download_attendance_excel(request, employee_id):
+    # Fetch the attendance data for the specified employee
+    employee = get_object_or_404(Employee, id=employee_id)
+    created_at = employee.admin.created_at.date()
+    current_date = date.today()
+    all_dates = [created_at + timedelta(days=i) for i in range((current_date - created_at).days + 1)]
+    attendance_data = Attendance.objects.filter(employee_id=employee_id)
+
+    # Prepare the data in a format suitable for Excel
+    data = [
+        ['Date', 'Status', 'Created At'],
+    ]
+    
+    for d in all_dates:
+        for attendance in attendance_data:
+            if d == attendance.date:
+                data.append([attendance.date, attendance.status, attendance.created_at])
+            else:
+                data.append([d, None, ""])
+    # Create an ExcelResponse
+    return ExcelResponse(request,data, output_name=f'{employee_id}_attendance_{current_date}.xls')
+
 
 @receiver(post_save, sender=Holiday)
 def mark_holiday_attendance(sender, instance, **kwargs):
@@ -33,6 +75,20 @@ def mark_holiday_attendance(sender, instance, **kwargs):
 def holiday_list(request):
     holidays = Holiday.objects.all()
     return render(request, 'main_app/holiday_list.html', {'holidays': holidays})
+
+
+def update_attendance_new_employee(employee_id):
+    holidays = Holiday.objects.all()
+    
+    for holiday in holidays:
+        date = holiday.date
+        
+        employee = get_object_or_404(Employee, id=employee_id)
+        existing_attendance = Attendance.objects.filter(employee=employee, date=date)
+        if not existing_attendance:
+            # Create a new attendance record
+            attendance = Attendance(employee=employee, date=date, status='holiday')
+            attendance.save()
 
 # def add_edit_holiday(request, holiday_id=None):
 #     if holiday_id:
@@ -164,26 +220,35 @@ def add_manager(request):
     return render(request, 'ceo_template/add_manager_template.html', context)
 
 def add_employee(request):
-    employee_form = EmployeeForm(request.POST or None, request.FILES or None)
-    context = {'form': employee_form, 'page_title': 'Add Employee'}
     if request.method == 'POST':
+        employee_form = EmployeeForm(request.POST, request.FILES)
         if employee_form.is_valid():
             first_name = employee_form.cleaned_data.get('first_name')
             last_name = employee_form.cleaned_data.get('last_name')
-            address = employee_form.cleaned_data.get('address')
             email = employee_form.cleaned_data.get('email')
             gender = employee_form.cleaned_data.get('gender')
             password = employee_form.cleaned_data.get('password')
             department = employee_form.cleaned_data.get('department')
-            passport = request.FILES['profile_pic']
-            fs = FileSystemStorage()
-            filename = fs.save(passport.name, passport)
-            passport_url = fs.url(filename)
+            address = employee_form.cleaned_data.get('address', "Selorix Private Limited")
+
+            # Check if 'profile_pic' is provided in the form data
+            if 'profile_pic' in request.FILES:
+                passport = request.FILES['profile_pic']
+                fs = FileSystemStorage()
+                filename = fs.save(passport.name, passport)
+                passport_url = fs.url(filename)
+            else:
+                # If 'profile_pic' is not provided, set a default profile picture
+                fs = FileSystemStorage()
+                # filename = fs.save(passport.name, passport)
+                passport_url = fs.url("images.png")
+
             try:
                 user = CustomUser.objects.create_user(
                     email=email, password=password, user_type=3, first_name=first_name, last_name=last_name, profile_pic=passport_url)
                 user.gender = gender
-                user.address = address
+                if address is not None:
+                    user.address = address
                 user.employee.department = department
                 user.save()
                 messages.success(request, "Successfully Added")
@@ -191,7 +256,11 @@ def add_employee(request):
             except Exception as e:
                 messages.error(request, "Could Not Add: " + str(e))
         else:
-            messages.error(request, "Could Not Add: ")
+            messages.error(request, "Could Not Add: Form is invalid")
+    else:
+        employee_form = EmployeeForm()
+
+    context = {'form': employee_form, 'page_title': 'Add Employee'}
     return render(request, 'ceo_template/add_employee_template.html', context)
 
 def manage_employee(request):
@@ -442,9 +511,31 @@ def view_employee_leave(request):
 
 
 def admin_view_attendance(request):
-    departments = Employee.objects.all()
+    employee = Employee.objects.all()
+    employee_data = []
+    for emp in employee:
+        present_count = Attendance.objects.filter(employee_id=emp.id, status='present').count()
+        present_count+= Attendance.objects.filter(employee_id=emp.id, status='holiday').count()
+
+        all_attendance = Attendance.objects.all()
+        # Count the total number of available attendance records for the employee
+        total_attendance_count = Attendance.objects.filter(employee_id=emp.id).count()
+
+        # Calculate the present percentage
+        if total_attendance_count > 0:
+            present_percentage = (present_count / total_attendance_count) * 100
+        else:
+            present_percentage = 0  # Avoid division by zero
+            
+        employee_data.append({
+            'employee': emp,
+            'present_percentage': present_percentage,
+        })
+
+        
     context = {
-        'departments': departments,
+        'employees': employee_data,
+        'all_data' : all_attendance,
         'page_title': 'View Attendance'
     }
 

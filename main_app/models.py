@@ -73,7 +73,6 @@ class Manager(models.Model):
 
 class Employee(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    # manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING, null=True, blank=False)
     department = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
 
     def __str__(self):

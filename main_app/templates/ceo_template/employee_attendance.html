@@ -1,0 +1,49 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    
+    <div class="card card-warning">
+        <div class="card-header">
+    <h1>Employee Attendance for {{ employee.admin.first_name|capfirst }}{{employee.admin.last_name|capfirst }}</h1>
+        </div>
+    <div class="card-body">
+    <table id="example2" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for date in all_dates %}
+            <tr>
+                <td>{{ date }}</td>
+                <td>
+                    {% for attendance in attendance_data %}
+                        {% if attendance.date == date %}
+                            {{ attendance.get_status_display }}
+                        {% endif %}
+                    {% empty %}
+                        <!-- Display a blank cell if no attendance data for the date -->
+                    {% endfor %}
+                </td>
+                <td>
+                    <button >Present</button>
+                    <button >Absent</button>
+                    <button >Leave</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+
+
+</section>
+{% endblock content %}

@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.widgets import DateInput, TextInput
-
+from datetime import date
 from .models import *
 
 
@@ -66,6 +66,12 @@ class EmployeeForm(CustomUserForm):
         fields = CustomUserForm.Meta.fields + \
             ['department']
 
+    def __init__(self, *args, **kwargs):
+        super(EmployeeForm, self).__init__(*args, **kwargs)
+
+        # Make 'address' and 'profile_pic' fields optional
+        self.fields['address'].required = False
+        self.fields['profile_pic'].required = False
 
 class AdminForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
@@ -183,14 +189,14 @@ class MarkAttendanceForm(FormSettings):
         model = Attendance
         fields = ['date', 'status']
         widgets = {
-            'date': DateInput(attrs={'type': 'date'}),
+            'date': forms.HiddenInput(attrs={'value': date.today().strftime('%Y-%m-%d')}),
         }
 
 
 class HolidayForm(forms.ModelForm):
     class Meta:
         model = Holiday
-        fields = ['name', 'date']
+        fields = ['name','date']
         # Define widgets for specific fields
         widgets = {
             'date': DateInput(attrs={'type': 'date'}),

@@ -32,7 +32,7 @@
                                     <th>Full Name</th>
                                     <th>Email</th>
                                     <th>Gender</th>
-                                    <th>Division</th>
+                                    {% comment %} <th>Division</th> {% endcomment %}
                                     <th>Department</th>
                                     <th>Avatar</th>
                                     <th>Edit</th>
@@ -45,7 +45,7 @@
                                     <td>{{employee.first_name|capfirst}} {{employee.last_name|capfirst}}</td>
                                     <td>{{employee.email}}</td>
                                     <td>{{employee.gender}}</td>
-                                    <td>{{employee.employee.division.name}}</td>
+                                    {% comment %} <td>{{employee.employee.division.name}}</td> {% endcomment %}
                                     <td>{{employee.employee.department.name}}</td>
                                     <td>
                                         {% if employee.profile_pic == "" %}

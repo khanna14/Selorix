@@ -22,12 +22,16 @@ from . import ceo_views, manager_views, employee_views, views
 urlpatterns = [
     path("", views.login_page, name='login_page'),
     path("get_attendance", views.get_attendance, name='get_attendance'),
+    
     path("firebase-messaging-sw.js", views.showFirebaseJS, name='showFirebaseJS'),
     path("doLogin/", views.doLogin, name='user_login'),
     path("logout_user/", views.logout_user, name='user_logout'),
     path("admin/home/", ceo_views.admin_home, name='admin_home'),
     path("manager/add", ceo_views.add_manager, name='add_manager'),
     # path("division/add", ceo_views.add_division, name='add_division'),
+    path('download-attendance-excel/<int:employee_id>/', ceo_views.download_attendance_excel, name='download_attendance_excel'),
+    
+    path('view-attendance-excel/<int:employee_id>/', ceo_views.view_attendance_excel, name='view_attendance_excel'),
     path("send_employee_notification/", ceo_views.send_employee_notification,
          name='send_employee_notification'),
     path("send_manager_notification/", ceo_views.send_manager_notification,
