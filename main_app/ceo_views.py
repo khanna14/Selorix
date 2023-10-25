@@ -17,19 +17,78 @@ from django.dispatch import receiver
 from .models import Holiday, Attendance
 from excel_response import ExcelResponse
 from datetime import date, timedelta
+from django.http import JsonResponse
+from django.utils import timezone 
+import xlwt
 import datetime
+import pytz
 
+@csrf_exempt
+def update_attendance(request, employee_id, date, status=None):
+    if request.method == 'POST':
+        if status==None:
+            status = request.POST.get('status')
+        try:
+            attendance = Attendance.objects.get(employee__id=employee_id, date=date)
+            attendance.status = status
+            attendance.save()
+        except Attendance.DoesNotExist:
+            Attendance.objects.create(employee_id=employee_id, date=date, status=status)
+
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
+
+
+@csrf_exempt
+def view_employee_leave(request):
+    if request.method != 'POST':
+        allLeave = LeaveReportEmployee.objects.all()
+        context = {
+            'allLeave': allLeave,
+            'page_title': 'Leave Applications From Employees'
+        }
+        return render(request, "ceo_template/employee_leave_view.html", context)
+    else:
+        id = request.POST.get('id')
+        empid = request.POST.get('emp_id')
+        status = request.POST.get('status')
+        if (status == '1'):
+            status = 1
+        else:
+            status = -1
+        try:
+            leave = get_object_or_404(LeaveReportEmployee, id=id)
+            leave.status = status
+            leave.save()
+            # After updating leave status, update the attendance
+            employee_id = leave.employee.admin.id
+            date = leave.date
+            if status == 1:
+                response = update_attendance(request, empid, date, "leave")
+                if response['success'] == True:
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False})
+            
+            return render(request, "ceo_template/employee_leave_view.html", context)
+            # Call the update_attendance function
+            
+        except Exception as e:
+            return ("Not Working")
+
+    
+    
 def view_attendance_excel(request, employee_id):
-    employee_id-=1
+    employee_id -= 1
     employee = get_object_or_404(Employee, id=employee_id)
     attendance_data = Attendance.objects.filter(employee_id=employee_id)
-    created_at = employee.admin.created_at.date()
-    current_date = date.today()
+    created_at = employee.admin.created_at  # No need for .date() here
+    current_date = date.today() + timedelta(15)
     all_dates = [created_at + timedelta(days=i) for i in range((current_date - created_at).days + 1)]
-
+    # all_dates_formatted = [date.strftime('%Y-%m-%d') for date in all_dates]
     context = {
         'employee': employee,
-        'all_dates' : all_dates,
+        'all_dates': all_dates,
         'attendance_data': attendance_data,
     }
 
@@ -37,25 +96,96 @@ def view_attendance_excel(request, employee_id):
 
 def download_attendance_excel(request, employee_id):
     # Fetch the attendance data for the specified employee
+    employee_id -= 1
     employee = get_object_or_404(Employee, id=employee_id)
-    created_at = employee.admin.created_at.date()
-    current_date = date.today()
+    
+    # Ensure created_at is a date object
+    created_at = employee.admin.created_at
+    
+    # Get the current date and add 15 days
+    current_date = date.today() + timedelta(days=15)
+    
     all_dates = [created_at + timedelta(days=i) for i in range((current_date - created_at).days + 1)]
     attendance_data = Attendance.objects.filter(employee_id=employee_id)
-
-    # Prepare the data in a format suitable for Excel
-    data = [
-        ['Date', 'Status', 'Created At'],
-    ]
     
+    # Create a new workbook and add a worksheet
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Attendance Report')
+
+    # Define column headers
+    row_num = 0
+    columns = ['Date', 'Status', 'Created At']
+
+    for col_num, column_title in enumerate(columns):
+        ws.write(row_num, col_num, column_title)
+
+    # Define a date format
+    date_style = xlwt.XFStyle()
+    date_style.num_format_str = 'yyyy-mm-dd'
+
+    # Populate the worksheet with attendance data
+    row_num += 1
+
     for d in all_dates:
         for attendance in attendance_data:
             if d == attendance.date:
-                data.append([attendance.date, attendance.status, attendance.created_at])
+                row = [attendance.date, attendance.status, attendance.created_at]
+                break
             else:
-                data.append([d, None, ""])
-    # Create an ExcelResponse
-    return ExcelResponse(request,data, output_name=f'{employee_id}_attendance_{current_date}.xls')
+                row = [d, "None", ""]
+            
+            
+        for col_num, cell_value in enumerate(row):
+                if col_num == 0:  # Apply date format to the first column (Date)
+                    ws.write(row_num, col_num, cell_value, date_style)
+                elif col_num == 2:  # Apply date format to the first column (Date)
+                    ws.write(row_num, col_num, cell_value, date_style)
+                else:
+                    ws.write(row_num, col_num, cell_value)
+            
+        row_num += 1
+            
+
+    # Create an HTTP response with the Excel file
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = f'attachment; filename={employee.admin.id}{employee.admin.first_name}{employee.admin.last_name}_attendance_{current_date}.xls'
+    wb.save(response)
+
+    return response
+
+
+def admin_view_attendance(request):
+    employee = Employee.objects.all()
+    employee_data = []
+    for emp in employee:
+        present_count = Attendance.objects.filter(employee_id=emp.id, status='present').count()
+        # present_count+= Attendance.objects.filter(employee_id=emp.id, status='holiday').count()
+
+        all_attendance = Attendance.objects.all()
+        
+        # Count the total number of available attendance records for the employee
+        total_attendance_count = Attendance.objects.filter(employee_id=emp.id).count()
+
+        # Calculate the present percentage
+        if total_attendance_count > 0:
+            present_percentage = (present_count / total_attendance_count) * 100
+        else:
+            present_percentage = 0  # Avoid division by zero
+            
+        employee_data.append({
+            'employee': emp,
+            'present_percentage': present_percentage,
+        })
+
+        
+    context = {
+        'employees': employee_data,
+        'all_data' : all_attendance,
+        'page_title': 'View Attendance'
+    }
+
+    return render(request, "ceo_template/view_all_attendance.html", context)
+
 
 
 @receiver(post_save, sender=Holiday)
@@ -75,7 +205,6 @@ def mark_holiday_attendance(sender, instance, **kwargs):
 def holiday_list(request):
     holidays = Holiday.objects.all()
     return render(request, 'main_app/holiday_list.html', {'holidays': holidays})
-
 
 def update_attendance_new_employee(employee_id):
     holidays = Holiday.objects.all()
@@ -155,12 +284,16 @@ def add_department(request):
     return render(request, 'ceo_template/add_department_template.html', context)
 
 def admin_home(request):
-    total_manager = Manager.objects.all().count()
-    total_employees = Employee.objects.all().count()
+    # total_manager = Manager.objects.all().count()
+    # total_employees = Employee.objects.all().count()
     departments = Department.objects.all()
-    total_department = departments.count()
+    # total_department = departments.count()
     attendance_list = Attendance.objects.all()
-    total_attendance = attendance_list.count()
+    today = timezone.now().date()
+    present_count = Attendance.objects.filter(date=today, status='present').count()
+    absent_count = Attendance.objects.filter(date=today, status='absent').count()
+    # total_attendance = attendance_list.count()
+    new_leave_request = LeaveReportEmployee.objects.filter(status=0).count()
     attendance_list = []
     department_list = []
     for department in departments:
@@ -169,6 +302,9 @@ def admin_home(request):
         attendance_list.append(attendance_count)
     context = {
         'page_title': "Administrative Dashboard",
+        'new_leave_requests' : new_leave_request,
+        'present_count' : present_count,
+        'absent_count' : absent_count
         # 'total_employees': total_employees,
         # 'total_manager': total_manager,
         # 'total_department': total_department,
@@ -485,61 +621,6 @@ def check_email_availability(request):
 #             return False
 
 
-@csrf_exempt
-def view_employee_leave(request):
-    if request.method != 'POST':
-        allLeave = LeaveReportEmployee.objects.all()
-        context = {
-            'allLeave': allLeave,
-            'page_title': 'Leave Applications From Employees'
-        }
-        return render(request, "ceo_template/employee_leave_view.html", context)
-    else:
-        id = request.POST.get('id')
-        status = request.POST.get('status')
-        if (status == '1'):
-            status = 1
-        else:
-            status = -1
-        try:
-            leave = get_object_or_404(LeaveReportEmployee, id=id)
-            leave.status = status
-            leave.save()
-            return HttpResponse(True)
-        except Exception as e:
-            return False
-
-
-def admin_view_attendance(request):
-    employee = Employee.objects.all()
-    employee_data = []
-    for emp in employee:
-        present_count = Attendance.objects.filter(employee_id=emp.id, status='present').count()
-        present_count+= Attendance.objects.filter(employee_id=emp.id, status='holiday').count()
-
-        all_attendance = Attendance.objects.all()
-        # Count the total number of available attendance records for the employee
-        total_attendance_count = Attendance.objects.filter(employee_id=emp.id).count()
-
-        # Calculate the present percentage
-        if total_attendance_count > 0:
-            present_percentage = (present_count / total_attendance_count) * 100
-        else:
-            present_percentage = 0  # Avoid division by zero
-            
-        employee_data.append({
-            'employee': emp,
-            'present_percentage': present_percentage,
-        })
-
-        
-    context = {
-        'employees': employee_data,
-        'all_data' : all_attendance,
-        'page_title': 'View Attendance'
-    }
-
-    return render(request, "ceo_template/admin_view_attendance.html", context)
 
 @csrf_exempt
 def get_admin_attendance(request):
@@ -704,9 +785,28 @@ def delete_holiday(request, holiday_id):
     messages.success(request, "Holiday deleted successfully!")
     return redirect(reverse('holiday_list'))
 
+@csrf_exempt
+def get_employees(request):
+    department_id = request.POST.get('department')
+    try:
+        department = get_object_or_404(Department, id=department_id)
+        employees = Employee.objects.all()
+        employee_data = []
+        for employee in employees:
+            if employee.department == department:
+                data = {
+                    "id": employee.id,
+                    "name": employee.admin.last_name + " " + employee.admin.first_name,
+                    "department_id" : department.id
+                }
+            employee_data.append(data)
+        return JsonResponse(json.dumps(employee_data), content_type='application/json', safe=False)
+    except Exception as e:
+        return e
 
 
-def manager_add_salary(request):
+
+def ceo_add_salary(request):
     # manager = get_object_or_404(Manager, admin=request.user)
     departments = Department.objects.all()
     context = {
@@ -735,7 +835,7 @@ def manager_add_salary(request):
                 return redirect(reverse('get_all_employee_salary'))
         except Exception as e:
             messages.warning(request, "Error Occured While Processing Form")
-    return render(request, "manager_template/manager_add_salary.html", context)
+    return render(request, "ceo_template/ceo_add_salary.html", context)
 
 
 @csrf_exempt
@@ -761,4 +861,4 @@ def get_all_employee_salary(request):
         'salarys': salarys,
         'page_title': "All Salary"
     }
-    return render(request, "ceo_template/manage_employee_salary.html", context)
+    return render(request, "ceo_template/ceo_employee_salary.html", context)

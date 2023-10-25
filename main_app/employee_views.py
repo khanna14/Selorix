@@ -17,33 +17,35 @@ from .models import *
 def employee_home(request):
     employee = get_object_or_404(Employee, admin=request.user)
     total_department = Department.objects.all().count()
-    # total_attendance = AttendanceReport.objects.filter(employee=employee).count()
-    # total_present = AttendanceReport.objects.filter(employee=employee, status=True).count()
-    # if total_attendance == 0:  # Don't divide. DivisionByZero
-    #     percent_absent = percent_present = 0
-    # else:
-    #     percent_present = math.floor((total_present/total_attendance) * 100)
-    #     percent_absent = math.ceil(100 - percent_present)
+    
+    
+    absent_count = Attendance.objects.filter(employee_id=employee.id, status='absent').count()
+    present_count = Attendance.objects.filter(employee_id=employee.id, status='present').count()
+    holiday_count = Attendance.objects.filter(employee_id=employee.id, status='holiday').count()
+
+    # Count the total number of available attendance records for the employee
+    total_attendance_count = Attendance.objects.filter(employee_id=employee.id).count() - holiday_count
+
+    # Calculate the present percentage
+    if total_attendance_count != 0:
+        absent_percentage = (absent_count / total_attendance_count) * 100
+        present_percentage = (present_count / total_attendance_count) * 100
+    
+    else:
+        absent_percentage = 0  # Avoid division by zero
+        present_percentage = 0  # Avoid division by zero
+        
     department_name = []
     data_present = []
     data_absent = []
     departments = Department.objects.all()
-    # for department in departments:
-    #     attendance = Attendance.objects.filter(department=department)
-    #     present_count = AttendanceReport.objects.filter(
-    #         attendance__in=attendance, status=True, employee=employee).count()
-    #     absent_count = AttendanceReport.objects.filter(
-    #         attendance__in=attendance, status=False, employee=employee).count()
-    #     department_name.append(department.name)
-    #     data_present.append(present_count)
-    #     data_absent.append(absent_count)
     context = {
-        # 'total_attendance': total_attendance,
-        # 'percent_present': percent_present,
-        # 'percent_absent': percent_absent,
+        'employee': employee,
+        'absent_percentage': absent_percentage,
+        'present_percentage': present_percentage,
         'total_attendance': "Dummy",
-        'percent_present': "Dummy",
-        'percent_absent': "Dummy",
+        # 'percent_present': "Dummy",
+        # 'percent_absent': "Dummy",
         'total_department': total_department,
         'departments': departments,
         'data_present': data_present,
@@ -55,37 +57,54 @@ def employee_home(request):
     return render(request, 'employee_template/home_content.html', context)
 
 
-@ csrf_exempt
-def employee_view_attendance(request):
-    employee = get_object_or_404(Employee, admin=request.user)
-    if request.method != 'POST':
-        context = {
-            'departments': Department.objects.all(),
-            'page_title': 'View Attendance'
-        }
-        return render(request, 'employee_template/employee_view_attendance.html', context)
+# @ csrf_exempt
+# def employee_view_attendance(request):
+#     employee = get_object_or_404(Employee, admin=request.user)
+#     if request.method != 'POST':
+#         context = {
+#             'departments': Department.objects.all(),
+#             'page_title': 'View Attendance'
+#         }
+#         return render(request, 'employee_template/employee_view_attendance.html', context)
+#     else:
+#         department_id = request.POST.get('department')
+#         start = request.POST.get('start_date')
+#         end = request.POST.get('end_date')
+#         try:
+#             department = get_object_or_404(Department, id=department_id)
+#             start_date = datetime.strptime(start, "%Y-%m-%d")
+#             end_date = datetime.strptime(end, "%Y-%m-%d")
+#             attendance = Attendance.objects.filter(
+#                 date__range=(start_date, end_date), department=department)
+#             attendance_reports = AttendanceReport.objects.filter(
+#                 attendance__in=attendance, employee=employee)
+#             json_data = []
+#             for report in attendance_reports:
+#                 data = {
+#                     "date":  str(report.attendance.date),
+#                     "status": report.status
+#                 }
+#                 json_data.append(data)
+#             return JsonResponse(json.dumps(json_data), safe=False)
+#         except Exception as e:
+#             return None
+
+def check_attendance(request,employee ,form,existing_attendance):
+    attendance_date = form.cleaned_data['date']
+    existing_attendance = Attendance.objects.filter(employee=employee, date=attendance_date).first()
+                
+    if existing_attendance:
+        # Update existing attendance record
+        existing_attendance.status = form.cleaned_data['status']
+        existing_attendance.save()
+        messages.success(request, "Attendance updated")
     else:
-        department_id = request.POST.get('department')
-        start = request.POST.get('start_date')
-        end = request.POST.get('end_date')
-        try:
-            department = get_object_or_404(Department, id=department_id)
-            start_date = datetime.strptime(start, "%Y-%m-%d")
-            end_date = datetime.strptime(end, "%Y-%m-%d")
-            attendance = Attendance.objects.filter(
-                date__range=(start_date, end_date), department=department)
-            attendance_reports = AttendanceReport.objects.filter(
-                attendance__in=attendance, employee=employee)
-            json_data = []
-            for report in attendance_reports:
-                data = {
-                    "date":  str(report.attendance.date),
-                    "status": report.status
-                }
-                json_data.append(data)
-            return JsonResponse(json.dumps(json_data), safe=False)
-        except Exception as e:
-            return None
+        # Create a new attendance record
+        obj = form.save(commit=False)
+        obj.employee = employee
+        obj.save()
+        messages.success(request, "Attendance marked")
+
 
 def employee_mark_attendance(request):
     form = MarkAttendanceForm(request.POST or None)
@@ -101,27 +120,29 @@ def employee_mark_attendance(request):
                 attendance_date = form.cleaned_data['date']
                 existing_attendance = Attendance.objects.filter(employee=employee, date=attendance_date).first()
                 
-                if existing_attendance:
-                    # Update existing attendance record
-                    existing_attendance.status = form.cleaned_data['status']
-                    existing_attendance.save()
-                else:
-                    # Create a new attendance record
-                    obj = form.save(commit=False)
-                    obj.employee = employee
-                    obj.save()
+                check_attendance(request, employee, form, existing_attendance)
                 
+                # if existing_attendance:
+                #     # Update existing attendance record
+                #     existing_attendance.status = form.cleaned_data['status']
+                #     existing_attendance.save()
+                #     messages.success(request, "Attendance updated")
+                # else:
+                #     # Create a new attendance record
+                #     obj = form.save(commit=False)
+                #     obj.employee = employee
+                #     obj.save()
+                #     messages.success(request, "Attendance marked")
+
                 # Handle leave approval and auto-updating attendance status here
                 # ...
                 
-                messages.success(request, "Marked")
                 return redirect(reverse('employee_mark_attendance'))
-            except Exception:
-                messages.error(request, "Could not submit")
+            except Exception as e:
+                messages.error(request, e)
         else:
             messages.error(request, "Form has errors!")
     return render(request, "employee_template/employee_mark_attendance.html", context)
-
 
 def employee_apply_leave(request):
     form = LeaveReportEmployeeForm(request.POST or None)
@@ -140,7 +161,7 @@ def employee_apply_leave(request):
                 messages.success(
                     request, "Application for leave has been submitted for review")
                 return redirect(reverse('employee_apply_leave'))
-            except Exception:
+            except Exception as e:
                 messages.error(request, "Could not submit")
         else:
             messages.error(request, "Form has errors!")

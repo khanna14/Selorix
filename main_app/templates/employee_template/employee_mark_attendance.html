@@ -32,8 +32,9 @@
         <tr>
             <td>{{forloop.counter}}</td>
             <td>{{attendance.date}}</td>
-              <!-- <td>{{leave.message}}</td> -->
-              <td>{{attendance.status}}</td>
+              <td>
+    {{ attendance.status|capfirst }}
+</td>
               
             </tr>
             {% endfor %}

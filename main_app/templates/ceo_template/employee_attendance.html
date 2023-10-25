@@ -6,10 +6,17 @@
 
 <section class="content">
     
+    
+
     <div class="card card-warning">
         <div class="card-header">
-    <h1>Employee Attendance for {{ employee.admin.first_name|capfirst }}{{employee.admin.last_name|capfirst }}</h1>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>Employee Attendance for {{ employee.admin.first_name|capfirst }}{{ employee.admin.last_name|capfirst }}</h1>
+                <a href={% url 'admin_view_attendance' %} class="btn btn-light">All Employees</a>
+            </div>
         </div>
+        <!-- Rest of your card content here -->
+    </div>
     <div class="card-body">
     <table id="example2" class="table table-bordered table-hover">
         <thead>
@@ -23,7 +30,7 @@
             {% for date in all_dates %}
             <tr>
                 <td>{{ date }}</td>
-                <td>
+                <td >
                     {% for attendance in attendance_data %}
                         {% if attendance.date == date %}
                             {{ attendance.get_status_display }}
@@ -33,10 +40,11 @@
                     {% endfor %}
                 </td>
                 <td>
-                    <button >Present</button>
-                    <button >Absent</button>
-                    <button >Leave</button>
+                    <button class="btn btn-success attendance-btn" data-date="{{ date|date:"Y-m-d" }}" data-status="present">Present</button>
+                    <button class="btn btn-danger attendance-btn" data-date="{{ date|date:"Y-m-d" }}" data-status="absent">Absent</button>
+                    <button class="btn btn-warning attendance-btn" data-date="{{ date|date:"Y-m-d" }}" data-status="leave">Leave</button>
                 </td>
+                
             </tr>
             {% endfor %}
         </tbody>
@@ -46,4 +54,29 @@
 
 
 </section>
+
 {% endblock content %}
+{% block custom_js %}
+<script>
+    document.querySelectorAll('.attendance-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var date = button.getAttribute('data-date');
+            console.log(date) // Get the date from your template context
+            var status = button.getAttribute('data-status');
+            var employeeId = '{{ employee.admin.id }}' -1; // Get the employee ID from your template context
+        
+            // Send an AJAX request to update attendance
+            $.post('/update_attendance/' + employeeId + '/' + date + '/', { status: status }, function (data) {
+                if (data.success) {
+                    // Update the status cell in the table without refreshing the page
+                    location.reload();
+//                    button.closest('tr').querySelector('td:last-child').textContent = "Attendance Updated Please Referesh The Page";
+                } else {
+                    alert('Failed to update attendance.');
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock custom_js %}

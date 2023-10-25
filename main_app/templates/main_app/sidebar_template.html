@@ -11,7 +11,7 @@
             <div class="row justify-content-center align-items-center">
                 <a href="{% url 'admin_home' %}" class="text-center">
                     <div class="col-12 col-md-6">
-                        <img src="{% static 'dist/img/brandLogo.ico' %}" alt="..." class="img-thumbnail img-fluid">
+                        <img src="{% static 'dist/img/Atlas.png' %}" alt="..." class="img-thumbnail img-fluid">
                     </div>
                 </a>
             </div>
@@ -442,14 +442,14 @@
                                             </a>
                                         </li>
 
-                                        <li class="nav-item">
+                                        {% comment %} <li class="nav-item">
                                             {% url 'employee_view_attendance' as employee_view_attendance %}
                                             <a href="{{employee_view_attendance}}"
                                                 class="nav-link {% if employee_view_attendance == request.path %} active {% endif %}">
                                                 <i class="nav-icon fas fa-th"></i>
                                                 <p>View Attendance</p>
                                             </a>
-                                        </li>
+                                        </li> {% endcomment %}
 
                                         <li class="nav-item">
                                             {% url 'employee_view_notification' as employee_view_notification %}

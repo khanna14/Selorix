@@ -15,7 +15,7 @@ class EditSalaryView(View):
             'form': salaryForm,
             'page_title': "Edit Employee's Salary"
         }
-        return render(request, "manager_template/edit_employee_salary.html", context)
+        return render(request, "ceo_template/edit_employee_salary.html", context)
 
     def post(self, request, *args, **kwargs):
         form = EditSalaryForm(request.POST)
@@ -37,4 +37,4 @@ class EditSalaryView(View):
                 messages.warning(request, "Salary Could Not Be Updated")
         else:
             messages.warning(request, "Salary Could Not Be Updated")
-        return render(request, "manager_template/edit_employee_salary.html", context)
+        return render(request, "ceo_template/edit_employee_salary.html", context)

@@ -30,6 +30,11 @@ urlpatterns = [
     path("manager/add", ceo_views.add_manager, name='add_manager'),
     # path("division/add", ceo_views.add_division, name='add_division'),
     path('download-attendance-excel/<int:employee_id>/', ceo_views.download_attendance_excel, name='download_attendance_excel'),
+     path('update_attendance/<int:employee_id>/<str:date>/', ceo_views.update_attendance, name='update_attendance'),
+
+    
+    
+    
     
     path('view-attendance-excel/<int:employee_id>/', ceo_views.view_attendance_excel, name='view_attendance_excel'),
     path("send_employee_notification/", ceo_views.send_employee_notification,
@@ -63,10 +68,10 @@ urlpatterns = [
     #     path("division/manage/", ceo_views.manage_division, name='manage_division'),   #### To be Removed
     path("department/manage/", ceo_views.manage_department,
          name='manage_department'),
-    path("manager/edit/<int:manager_id>",
-         ceo_views.edit_manager, name='edit_manager'),
-    path("manager/delete/<int:manager_id>",
-         ceo_views.delete_manager, name='delete_manager'),
+#     path("manager/edit/<int:manager_id>",
+#          ceo_views.edit_manager, name='edit_manager'),
+#     path("manager/delete/<int:manager_id>",
+#          ceo_views.delete_manager, name='delete_manager'),
 
 
     path('holiday', ceo_views.holiday_list, name='holiday_list'),
@@ -77,12 +82,12 @@ urlpatterns = [
          ceo_views.delete_holiday, name='delete_holiday'),
 
 
-    path("manager/salary/add/", ceo_views.manager_add_salary,
+    path("ceo/salary/add/", ceo_views.ceo_add_salary,
          name='manager_add_salary'),
-    path("manager/salary/edit/", EditSalaryView.as_view(),
+    path("ceo/salary/edit/", EditSalaryView.as_view(),
          name='edit_employee_salary'),
          
-    path('manager/salary/fetch/', ceo_views.fetch_employee_salary,
+    path('ceo/salary/fetch/', ceo_views.fetch_employee_salary,
          name='fetch_employee_salary'),
     path('ceo/salary/fetch/all', ceo_views.get_all_employee_salary,
          name='get_all_employee_salary'),
@@ -106,29 +111,29 @@ urlpatterns = [
 
 
     # Manager
-    path("manager/home/", manager_views.manager_home, name='manager_home'),
+#     path("manager/home/", manager_views.manager_home, name='manager_home'),
     #     path("manager/apply/leave/", manager_views.manager_apply_leave,
     #          name='manager_apply_leave'),
     # path("manager/feedback/", manager_views.manager_feedback,
     #      name='manager_feedback'),
-    path("manager/view/profile/", manager_views.manager_view_profile,
-         name='manager_view_profile'),
-    path("manager/attendance/take/", manager_views.manager_take_attendance,
-         name='manager_take_attendance'),
-    path("manager/attendance/update/", manager_views.manager_update_attendance,
-         name='manager_update_attendance'),
-    path("manager/get_employees/",
-         manager_views.get_employees, name='get_employees'),
-    path("manager/attendance/fetch/", manager_views.get_employee_attendance,
-         name='get_employee_attendance'),
-    path("manager/attendance/save/",
-         manager_views.save_attendance, name='save_attendance'),
-    path("manager/attendance/update/",
-         manager_views.update_attendance, name='update_attendance'),
-    path("manager/fcmtoken/", manager_views.manager_fcmtoken,
-         name='manager_fcmtoken'),
-    path("manager/view/notification/", manager_views.manager_view_notification,
-         name="manager_view_notification"),
+#     path("manager/view/profile/", manager_views.manager_view_profile,
+#          name='manager_view_profile'),
+#     path("manager/attendance/take/", manager_views.manager_take_attendance,
+#          name='manager_take_attendance'),
+#     path("manager/attendance/update/", manager_views.manager_update_attendance,
+#          name='manager_update_attendance'),
+    path("ceo/get_employees/",
+         ceo_views.get_employees, name='get_employees'),
+#     path("manager/attendance/fetch/", manager_views.get_employee_attendance,
+#          name='get_employee_attendance'),
+#     path("manager/attendance/save/",
+#          manager_views.save_attendance, name='save_attendance'),
+#     path("manager/attendance/update/",
+#          manager_views.update_attendance, name='update_attendance'),
+#     path("manager/fcmtoken/", manager_views.manager_fcmtoken,
+#          name='manager_fcmtoken'),
+#     path("manager/view/notification/", manager_views.manager_view_notification,
+#          name="manager_view_notification"),
     #     path("manager/salary/add/", manager_views.manager_add_salary,
     #          name='manager_add_salary'),
     #     path("manager/salary/edit/", EditSalaryView.as_view(),
@@ -140,8 +145,8 @@ urlpatterns = [
 
     # Employee
     path("employee/home/", employee_views.employee_home, name='employee_home'),
-    path("employee/view/attendance/", employee_views.employee_view_attendance,
-         name='employee_view_attendance'),
+#     path("employee/view/attendance/", employee_views.employee_view_attendance,
+#          name='employee_view_attendance'),
     path("employee/mark/attendance/", employee_views.employee_mark_attendance,
          name='employee_mark_attendance'),
     path("employee/apply/leave/", employee_views.employee_apply_leave,

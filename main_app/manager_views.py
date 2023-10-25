@@ -48,23 +48,6 @@ def manager_take_attendance(request):
     return render(request, 'manager_template/manager_take_attendance.html', context)
 
 
-@csrf_exempt
-def get_employees(request):
-    department_id = request.POST.get('department')
-    try:
-        department = get_object_or_404(Department, id=department_id)
-        employees = Employee.objects.all()
-        employee_data = []
-        for employee in employees:
-            data = {
-                "id": employee.id,
-                "name": employee.admin.last_name + " " + employee.admin.first_name
-            }
-            employee_data.append(data)
-        return JsonResponse(json.dumps(employee_data), content_type='application/json', safe=False)
-    except Exception as e:
-        return e
-
 
 
 @csrf_exempt

@@ -42,14 +42,14 @@ class CustomUser(AbstractUser):
     profile_pic = models.ImageField()
     address = models.TextField()
     fcm_token = models.TextField(default="")  # For firebase notifications
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.admin.first_name + ", " + self.admin.last_name
+        return self.first_name + ", " + self.last_name
 
 
 class Admin(models.Model):
@@ -58,8 +58,8 @@ class Admin(models.Model):
 
 class Department(models.Model):
     name = models.CharField(max_length=120)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -91,61 +91,63 @@ class Attendance(models.Model):
     # manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
     date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
+    # updated_at = models.DateField(auto_now=True)
+    
+    
 
 class AttendanceReport(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.DO_NOTHING)
     attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
     status = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
 class LeaveReportEmployee(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    date = models.CharField(max_length=60)
+    date = models.DateField()
     message = models.TextField()
     status = models.SmallIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
 # class LeaveReportManager(models.Model):
 #     manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
 #     date = models.CharField(max_length=60)
 #     message = models.TextField()
 #     status = models.SmallIntegerField(default=0)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+#     created_at = models.DateField(auto_now_add=True)
+#     updated_at = models.DateField(auto_now=True)
 
 
 # class FeedbackEmployee(models.Model):
 #     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
 #     feedback = models.TextField()
 #     reply = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+#     created_at = models.DateField(auto_now_add=True)
+#     updated_at = models.DateField(auto_now=True)
 
 
 # class FeedbackManager(models.Model):
 #     manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
 #     feedback = models.TextField()
 #     reply = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+#     created_at = models.DateField(auto_now_add=True)
+#     updated_at = models.DateField(auto_now=True)
 
 
 class NotificationManager(models.Model):
     manager = models.ForeignKey(Manager, on_delete=models.CASCADE)
     message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
 
 class NotificationEmployee(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
 
 class EmployeeSalary(models.Model):
@@ -153,9 +155,11 @@ class EmployeeSalary(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     base = models.FloatField(default=0)
     ctc = models.FloatField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
+    def __str__(self):
+        return self.employee.admin.first_name + ", " + self.employee.admin.last_name
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):

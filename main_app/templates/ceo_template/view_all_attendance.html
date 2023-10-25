@@ -57,9 +57,10 @@
                 <tr>
                   <td>{{ forloop.counter }}</td>
                   <td>{{ data.employee.admin.first_name|capfirst}}
-                    {{data.employee.admin.last_name|capfirst }}{{ data.employee.admin.id}}</td>
+                    {% comment %} {{data.employee.admin.last_name|capfirst }} {% endcomment %}
+                    ID {{ data.employee.admin.id}}</td>
                   <td>{{ data.employee.department.name }}</td>
-                  <td>{{ data.present_percentage }}%</td>
+                  <td>{{ data.present_percentage|floatformat}}%</td>
                   <td>
                     <a
                       href="{% url 'view_attendance_excel' employee_id=data.employee.admin.id %}">

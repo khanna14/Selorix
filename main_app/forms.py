@@ -187,11 +187,14 @@ class MarkAttendanceForm(FormSettings):
 
     class Meta:
         model = Attendance
-        fields = ['date', 'status']
-        widgets = {
-            'date': forms.HiddenInput(attrs={'value': date.today().strftime('%Y-%m-%d')}),
-        }
+        fields = ['date','status']
+        # widgets = {
+        #     'date': forms.HiddenInput(attrs={'value': date.today().strftime('%Y-%m-%d')}),
+        # }
 
+        widgets = {
+            'date': DateInput(attrs={'type': 'date'}),
+        }
 
 class HolidayForm(forms.ModelForm):
     class Meta:
