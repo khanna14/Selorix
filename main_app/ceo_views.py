@@ -157,12 +157,14 @@ def download_attendance_excel(request, employee_id):
 def admin_view_attendance(request):
     employee = Employee.objects.all()
     employee_data = []
+    all_attendance = []
     for emp in employee:
         present_count = Attendance.objects.filter(employee_id=emp.id, status='present').count()
         # present_count+= Attendance.objects.filter(employee_id=emp.id, status='holiday').count()
-
-        all_attendance = Attendance.objects.all()
-        
+        try:
+            all_attendance = Attendance.objects.all()
+        except Exception as e:
+            all_attendance = None
         # Count the total number of available attendance records for the employee
         total_attendance_count = Attendance.objects.filter(employee_id=emp.id).count()
 
