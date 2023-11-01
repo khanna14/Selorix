@@ -57,8 +57,8 @@
                 <tr>
                   <td>{{ forloop.counter }}</td>
                   <td>{{ data.employee.admin.first_name|capfirst}}
-                    {% comment %} {{data.employee.admin.last_name|capfirst }} {% endcomment %}
-                    ID {{ data.employee.admin.id}}</td>
+                    {{data.employee.admin.last_name|capfirst }}
+                    </td>
                   <td>{{ data.employee.department.name }}</td>
                   <td>{{ data.present_percentage|floatformat}}%</td>
                   <td>
