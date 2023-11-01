@@ -26,18 +26,22 @@ import pytz
 @csrf_exempt
 def update_attendance(request, employee_id, date, status=None):
     if request.method == 'POST':
-        if status==None:
+        if status is None:
             status = request.POST.get('status')
         try:
             attendance = Attendance.objects.get(employee__id=employee_id, date=date)
-            attendance.status = status
-            attendance.save()
+            if status == 'delete':
+                # Delete the attendance record
+                attendance.delete()
+            else:
+                attendance.status = status
+                attendance.save()
         except Attendance.DoesNotExist:
-            Attendance.objects.create(employee_id=employee_id, date=date, status=status)
+            if status != 'delete':
+                Attendance.objects.create(employee_id=employee_id, date=date, status=status)
 
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
-
 
 @csrf_exempt
 def view_employee_leave(request):
@@ -54,6 +58,12 @@ def view_employee_leave(request):
         status = request.POST.get('status')
         if (status == '1'):
             status = 1
+        elif status == '9':
+            # Delete the leave data if the status is '9'
+            leave = LeaveReportEmployee.objects.filter(id=id).first()
+            if leave:
+                leave.delete()
+            return JsonResponse({'success': True})
         else:
             status = -1
         try:
@@ -83,7 +93,8 @@ def view_attendance_excel(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
     attendance_data = Attendance.objects.filter(employee_id=employee_id)
     created_at = employee.admin.created_at  # No need for .date() here
-    current_date = date.today() + timedelta(15)
+    current_date = date.today()
+    # current_date = date.today() + timedelta(15)  // FOR TESTING ADDED 15 DAYS
     all_dates = [created_at + timedelta(days=i) for i in range((current_date - created_at).days + 1)]
     # all_dates_formatted = [date.strftime('%Y-%m-%d') for date in all_dates]
     context = {
@@ -103,7 +114,8 @@ def download_attendance_excel(request, employee_id):
     created_at = employee.admin.created_at
     
     # Get the current date and add 15 days
-    current_date = date.today() + timedelta(days=15)
+    current_date = date.today()
+    # current_date = date.today() + timedelta(days=15) // ADDED 15 DAYS FOR TESTING
     
     all_dates = [created_at + timedelta(days=i) for i in range((current_date - created_at).days + 1)]
     attendance_data = Attendance.objects.filter(employee_id=employee_id)
@@ -193,14 +205,20 @@ def admin_view_attendance(request):
 @receiver(post_save, sender=Holiday)
 def mark_holiday_attendance(sender, instance, **kwargs):
     date = instance.date
-    # department = None  # You can set a default department or choose one
     employees = Employee.objects.all()  # Fetch all employees
 
     for employee in employees:
         # Check if attendance for the same date and employee exists
         existing_attendance = Attendance.objects.filter(employee=employee, date=date)
-        if not existing_attendance:
-            # Create a new attendance record
+        
+        # Check the "created_at" date of the employee
+        if existing_attendance:
+            # Check if the "created_at" date of the employee is before or on the holiday date
+            if employee.created_at <= date:
+                # Update the attendance status to 'holiday'
+                existing_attendance.update(status='holiday')
+        else:
+            # Create a new attendance record with 'holiday' status
             attendance = Attendance(employee=employee, date=date, status='holiday')
             attendance.save()
 

@@ -46,3 +46,18 @@
     </div>
 </section>
 {% endblock content %}
+{% block custom_js %}
+<script>
+    // Find the label element by its 'for' attribute
+    var label = document.querySelector('label[for="id_date"]');
+
+    // Get the text from the 'value' attribute of the input element
+    var inputValue = document.getElementById('id_date').value;
+
+    // Create a new text node with the input value
+    var textNode = document.createTextNode(' ' + inputValue);
+
+    // Append the text node to the label
+    label.appendChild(textNode);
+</script>
+{% endblock custom_js %}

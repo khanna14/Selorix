@@ -2,8 +2,8 @@
 .idea
 *.pyc
 media/
-main_app/migrations/*
-!main_app/migrations/0001_initial.py
+main_app/migrations/
+
 db.sqlite3
 
 # Environments

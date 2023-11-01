@@ -1,6 +1,6 @@
 import json
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
@@ -13,9 +13,46 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import *
 from .models import *
 
+def employee_apply_leave(request):
+    form = LeaveReportEmployeeForm(request.POST or None)
+    employee = get_object_or_404(Employee, admin_id=request.user.id)
+    context = {
+        'form': form,
+        'leave_history': LeaveReportEmployee.objects.filter(employee=employee),
+        'page_title': 'Apply for leave'
+    }
+    if request.method == 'POST':
+        if request.method == 'POST':
+            form = LeaveReportEmployeeForm(request.POST)
+            if form.is_valid():
+                try:
+                    employee = get_object_or_404(Employee, admin_id=request.user.id)
+                    from_date = form.cleaned_data['from_date']
+                    to_date = form.cleaned_data['to_date']
+                    message = form.cleaned_data['message']
+                    
+                    # Generate a list of dates between from_date and to_date
+                    date_range = [from_date + timedelta(days=x) for x in range((to_date - from_date).days + 1)]
+                    
+                    # Create a LeaveReportEmployee object for each date in the range
+                    for date in date_range:
+                        obj = LeaveReportEmployee(employee=employee, date=date, message=message)
+                        obj.save()
+
+                    messages.success(request, "Leave application has been submitted for review")
+                    return redirect(reverse('employee_apply_leave'))
+                except Exception as e:
+                    messages.error(request, "Could not submit leave application")
+        else:
+            messages.error(request, "Form has errors!")
+    return render(request, "employee_template/employee_apply_leave.html", context)
+
+
+
 @ csrf_exempt
 def employee_home(request):
     employee = get_object_or_404(Employee, admin=request.user)
+    form = MarkPresentForm(request.POST or None)
     total_department = Department.objects.all().count()
     
     
@@ -34,7 +71,22 @@ def employee_home(request):
     else:
         absent_percentage = 0  # Avoid division by zero
         present_percentage = 0  # Avoid division by zero
-        
+    
+    current_date = date.today()
+    attendance_today = Attendance.objects.filter(employee_id=employee.id, date=current_date).first()
+
+    if attendance_today is not None:
+        # Attendance data exists for today
+        h3_text = f"{attendance_today.get_status_display()}"
+        p_text = "Today"
+        form_disabled = True
+    else:
+        # Attendance data does not exist for today
+        h3_text = "Mark Attendance"
+        p_text = "Attendance not marked for today"
+        form_disabled = False
+    
+    
     department_name = []
     data_present = []
     data_absent = []
@@ -44,15 +96,16 @@ def employee_home(request):
         'absent_percentage': absent_percentage,
         'present_percentage': present_percentage,
         'total_attendance': "Dummy",
-        # 'percent_present': "Dummy",
-        # 'percent_absent': "Dummy",
+        'form': form,
         'total_department': total_department,
         'departments': departments,
         'data_present': data_present,
         'data_absent': data_absent,
         'data_name': department_name,
-        'page_title': 'Employee Homepage'
-
+        'page_title': 'Employee Homepage',
+        'h3_text': h3_text,
+        'p_text': p_text,
+        'form_disabled': form_disabled,
     }
     return render(request, 'employee_template/home_content.html', context)
 
@@ -117,25 +170,13 @@ def employee_mark_attendance(request):
     if request.method == 'POST':
         if form.is_valid():
             try:
-                attendance_date = form.cleaned_data['date']
+                if form.cleaned_data['date']:
+                    attendance_date = form.cleaned_data['date']
+                else : 
+                    attendance_date = date.today().strftime('%Y-%m-%d')            
                 existing_attendance = Attendance.objects.filter(employee=employee, date=attendance_date).first()
                 
                 check_attendance(request, employee, form, existing_attendance)
-                
-                # if existing_attendance:
-                #     # Update existing attendance record
-                #     existing_attendance.status = form.cleaned_data['status']
-                #     existing_attendance.save()
-                #     messages.success(request, "Attendance updated")
-                # else:
-                #     # Create a new attendance record
-                #     obj = form.save(commit=False)
-                #     obj.employee = employee
-                #     obj.save()
-                #     messages.success(request, "Attendance marked")
-
-                # Handle leave approval and auto-updating attendance status here
-                # ...
                 
                 return redirect(reverse('employee_mark_attendance'))
             except Exception as e:
@@ -143,29 +184,6 @@ def employee_mark_attendance(request):
         else:
             messages.error(request, "Form has errors!")
     return render(request, "employee_template/employee_mark_attendance.html", context)
-
-def employee_apply_leave(request):
-    form = LeaveReportEmployeeForm(request.POST or None)
-    employee = get_object_or_404(Employee, admin_id=request.user.id)
-    context = {
-        'form': form,
-        'leave_history': LeaveReportEmployee.objects.filter(employee=employee),
-        'page_title': 'Apply for leave'
-    }
-    if request.method == 'POST':
-        if form.is_valid():
-            try:
-                obj = form.save(commit=False)
-                obj.employee = employee
-                obj.save()
-                messages.success(
-                    request, "Application for leave has been submitted for review")
-                return redirect(reverse('employee_apply_leave'))
-            except Exception as e:
-                messages.error(request, "Could not submit")
-        else:
-            messages.error(request, "Form has errors!")
-    return render(request, "employee_template/employee_apply_leave.html", context)
 
 
 # def employee_feedback(request):

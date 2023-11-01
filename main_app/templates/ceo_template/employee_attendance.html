@@ -43,6 +43,7 @@
                     <button class="btn btn-success attendance-btn" data-date="{{ date|date:"Y-m-d" }}" data-status="present">Present</button>
                     <button class="btn btn-danger attendance-btn" data-date="{{ date|date:"Y-m-d" }}" data-status="absent">Absent</button>
                     <button class="btn btn-warning attendance-btn" data-date="{{ date|date:"Y-m-d" }}" data-status="leave">Leave</button>
+                    <button class="btn btn-warning attendance-btn" data-date="{{ date|date:"Y-m-d" }}" data-status="delete">Delete</button>
                 </td>
                 
             </tr>
@@ -61,16 +62,12 @@
     document.querySelectorAll('.attendance-btn').forEach(function (button) {
         button.addEventListener('click', function () {
             var date = button.getAttribute('data-date');
-            console.log(date) // Get the date from your template context
             var status = button.getAttribute('data-status');
-            var employeeId = '{{ employee.admin.id }}' -1; // Get the employee ID from your template context
+            var employeeId = '{{ employee.admin.id }}' -1; 
         
-            // Send an AJAX request to update attendance
             $.post('/update_attendance/' + employeeId + '/' + date + '/', { status: status }, function (data) {
                 if (data.success) {
-                    // Update the status cell in the table without refreshing the page
                     location.reload();
-//                    button.closest('tr').querySelector('td:last-child').textContent = "Attendance Updated Please Referesh The Page";
                 } else {
                     alert('Failed to update attendance.');
                 }
